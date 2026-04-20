@@ -65,4 +65,14 @@ export const mockProducts: Product[] = [
     category: "Engine",
     imageUrl: "https://placehold.co/400x300/1a1a1a/orange?text=Belt",
   },
+  {
+    id: 7,
+    name: "Crash Guard",
+    slug: "crash-guard",
+    description: "Heavy duty crash guard impact absorbers.",
+    price: 127.99,
+    inStock: false,
+    category: "Pairings",
+    imageUrl: "https://placehold.co/400x300/1a1a1a/orange?text=Crash+Guard",
+  },
 ]

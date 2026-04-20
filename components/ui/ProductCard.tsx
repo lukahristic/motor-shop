@@ -1,7 +1,7 @@
     // components/ui/ProductCard.tsx
 // Displays a single product in the grid.
 // Receives a Product object as a prop — TypeScript enforces the shape.
-
+    
 import Image from "next/image"
 import Link from "next/link"
 import { Product } from "@/types"
