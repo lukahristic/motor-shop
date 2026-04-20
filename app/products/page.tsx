@@ -40,9 +40,6 @@ export default function ProductsPage() {
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-
-      
-
     </div>
   )
 }
