@@ -1,21 +1,21 @@
 // app/page.tsx
-
 import FeatureCard from "@/components/ui/FeatureCard"
+import YMMSelector from "@/components/ui/YMMSelector"
 
 export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center py-24 px-6 text-center">
+      <section className="flex flex-col items-center justify-center py-16 px-6 text-center">
         <h1 className="text-5xl font-bold text-orange-500 mb-4">
           Motor Shop
         </h1>
-        <p className="text-xl text-gray-400 max-w-xl">
+        <p className="text-xl text-gray-400 max-w-xl mb-10">
           Find the right parts for your vehicle. Search by Year, Make, and Model.
         </p>
-        <button className="mt-8 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors">
-          Browse Parts
-        </button>
+
+        {/* YMM Selector lives here on the homepage */}
+        <YMMSelector />
       </section>
 
       {/* Feature Cards */}

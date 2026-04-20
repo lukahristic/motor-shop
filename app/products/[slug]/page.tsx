@@ -78,6 +78,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           )}
 
+          {/* Compatible Vehicle — only shows if data exists */}
+          {product.compatibleMake && (
+            <p className="text-gray-500 text-sm mt-4">
+                Compatible with: {product.compatibleYear} {product.compatibleMake} {product.compatibleModel}
+            </p>
+            )}
+
           {/* Price */}
           <div className="text-4xl font-bold text-white mb-4">
             ${product.price.toFixed(2)}

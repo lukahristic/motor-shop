@@ -11,6 +11,9 @@ export interface Product {
     imageUrl?: string      // optional
     inStock: boolean
     category: string
+    compatibleYear?: number
+    compatibleMake?: string
+    compatibleModel?: string
   }
   
   export interface Vehicle {

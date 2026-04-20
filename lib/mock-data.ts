@@ -14,6 +14,9 @@ export const mockProducts: Product[] = [
     inStock: true,
     category: "Engine",
     imageUrl: "https://placehold.co/400x300/1a1a1a/orange?text=Oil+Filter",
+    compatibleYear: 2004,
+    compatibleMake: "Honda",
+    compatibleModel: "CBR600",
   },
   {
     id: 2,
@@ -76,3 +79,32 @@ export const mockProducts: Product[] = [
     imageUrl: "https://placehold.co/400x300/1a1a1a/orange?text=Crash+Guard",
   },
 ]
+
+// lib/mock-data.ts — add below your existing mockProducts
+
+// YMM data structure — Phase 4 this comes from the database
+export const ymmData: Record<string, Record<string, string[]>> = {
+  "2020": {
+    Toyota: ["Camry", "Corolla", "RAV4", "Hilux"],
+    Honda:  ["Civic", "Accord", "CR-V", "Jazz"],
+    Ford:   ["Ranger", "Everest", "Mustang"],
+  },
+  "2021": {
+    Toyota: ["Camry", "Corolla", "RAV4", "Fortuner"],
+    Honda:  ["Civic", "Accord", "CR-V"],
+    Ford:   ["Ranger", "Everest", "Bronco"],
+    Nissan: ["Navara", "Terra", "Almera"],
+  },
+  "2022": {
+    Toyota: ["Camry", "Corolla", "RAV4", "GR86"],
+    Honda:  ["Civic", "Accord", "CR-V", "BRV"],
+    Ford:   ["Ranger", "Everest", "Mustang"],
+    Nissan: ["Navara", "Terra", "Almera", "Magnite"],
+  },
+  "2023": {
+    Toyota: ["Camry", "Corolla", "RAV4", "Vios"],
+    Honda:  ["Civic", "Accord", "CR-V", "BRV"],
+    Nissan: ["Navara", "Terra", "Almera"],
+    Mitsubishi: ["Strada", "Montero", "Xpander"],
+  },
+}
