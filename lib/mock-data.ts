@@ -106,5 +106,6 @@ export const ymmData: Record<string, Record<string, string[]>> = {
     Honda:  ["Civic", "Accord", "CR-V", "BRV"],
     Nissan: ["Navara", "Terra", "Almera"],
     Mitsubishi: ["Strada", "Montero", "Xpander"],
+    Yamaha: ["Lexus", "Volvo"],
   },
 }
