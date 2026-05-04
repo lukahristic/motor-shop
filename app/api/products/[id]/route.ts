@@ -1,11 +1,7 @@
 // app/api/products/[id]/route.ts
-// Handles:
-//   GET    /api/products/:id  → get one product
-//   PUT    /api/products/:id  → update a product
-//   DELETE /api/products/:id  → delete a product
 
-import { NextResponse } from "next/server"
 import { mockProducts } from "@/lib/mock-data"
+import { successResponse, ApiErrors } from "@/lib/api-response"
 
 let products = [...mockProducts]
 
@@ -18,17 +14,9 @@ export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params
   const product = products.find((p) => p.id === Number(id))
 
-  if (!product) {
-    return NextResponse.json(
-      { success: false, error: "Product not found" },
-      { status: 404 }
-    )
-  }
+  if (!product) return ApiErrors.notFound("Product")
 
-  return NextResponse.json(
-    { success: true, data: product },
-    { status: 200 }
-  )
+  return successResponse(product)
 }
 
 // PUT /api/products/:id
@@ -36,28 +24,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params
     const body = await request.json()
-
     const index = products.findIndex((p) => p.id === Number(id))
 
-    if (index === -1) {
-      return NextResponse.json(
-        { success: false, error: "Product not found" },
-        { status: 404 }
-      )
-    }
+    if (index === -1) return ApiErrors.notFound("Product")
 
-    // Replace the product at that index with merged data
     products[index] = { ...products[index], ...body }
 
-    return NextResponse.json(
-      { success: true, data: products[index] },
-      { status: 200 }
-    )
+    return successResponse(products[index], "Product updated successfully")
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Invalid request body" },
-      { status: 400 }
-    )
+    return ApiErrors.badRequest("Invalid JSON in request body")
   }
 }
 
@@ -66,18 +41,9 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   const { id } = await params
   const index = products.findIndex((p) => p.id === Number(id))
 
-  if (index === -1) {
-    return NextResponse.json(
-      { success: false, error: "Product not found" },
-      { status: 404 }
-    )
-  }
+  if (index === -1) return ApiErrors.notFound("Product")
 
-  // Remove the product from the array
   const deleted = products.splice(index, 1)[0]
 
-  return NextResponse.json(
-    { success: true, data: deleted },
-    { status: 200 }
-  )
+  return successResponse(deleted, "Product deleted successfully")
 }

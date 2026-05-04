@@ -1,14 +1,9 @@
 // app/api/ymm/years/route.ts
-// GET /api/ymm/years → returns all available years
 
-import { NextResponse } from "next/server"
 import { ymmData } from "@/lib/mock-data"
+import { successResponse } from "@/lib/api-response"
 
 export async function GET() {
   const years = Object.keys(ymmData).sort((a, b) => Number(b) - Number(a))
-
-  return NextResponse.json(
-    { success: true, data: years },
-    { status: 200 }
-  )
+  return successResponse(years)
 }

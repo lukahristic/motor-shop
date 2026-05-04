@@ -1,0 +1,22 @@
+# docker-compose.yml
+# Defines the services (containers) for our project.
+# Right now just PostgreSQL — later we can add Redis, etc.
+
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15        # official PostgreSQL image, version 15
+    container_name: motorshop-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: motorshop
+    ports:
+      - "5432:5432"           # host:container — access DB on localhost:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # persist data between restarts
+
+volumes:
+  postgres_data:              # named volume — Docker manages this
