@@ -1,0 +1,95 @@
+// prisma/schema.prisma
+// This file defines your entire database structure.
+// Every time you change this file, you run a migration to apply it to the DB.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Product ──────────────────────────────────────────────
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  slug        String   @unique   // URL-friendly name, must be unique
+  description String?            // optional
+  price       Decimal  @db.Decimal(10, 2)
+  inStock     Boolean  @default(true)
+  imageUrl    String?
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // A product can be compatible with many vehicles
+  compatibilities ProductCompatibility[]
+}
+
+// ── Vehicle Year ──────────────────────────────────────────
+model Year {
+  id    Int    @id @default(autoincrement())
+  year  Int    @unique
+
+  makes Make[]
+}
+
+// ── Vehicle Make ──────────────────────────────────────────
+model Make {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  yearId Int
+  year   Year @relation(fields: [yearId], references: [id])
+
+  models Model[]
+
+  @@unique([yearId, name])  // Toyota can only appear once per year
+}
+
+// ── Vehicle Model ─────────────────────────────────────────
+model Model {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  makeId Int
+  make   Make @relation(fields: [makeId], references: [id])
+
+  compatibilities ProductCompatibility[]
+
+  @@unique([makeId, name])  // Camry can only appear once per make
+}
+
+// ── Product Compatibility (join table) ───────────────────
+// Links products to the vehicle models they fit
+// One product can fit many models
+// One model can have many compatible products
+model ProductCompatibility {
+  id        Int     @id @default(autoincrement())
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  modelId   Int
+  model     Model   @relation(fields: [modelId], references: [id])
+
+  @@unique([productId, modelId])  // no duplicate links
+}
+
+// ── User ──────────────────────────────────────────────────
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String   // will store hashed password — NEVER plain text
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+}
+
+// ── Role Enum ─────────────────────────────────────────────
+enum Role {
+  USER
+  ADMIN
+}
