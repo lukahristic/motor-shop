@@ -1,44 +1,41 @@
 // app/api/products/route.ts
-
-import { NextResponse } from "next/server"
-import { mockProducts } from "@/lib/mock-data"
+import { prisma } from "@/lib/prisma"
 import { successResponse, createdResponse, ApiErrors } from "@/lib/api-response"
-import { Product } from "@/types"
 
-let products = [...mockProducts]
-
-// GET /api/products
+// GET /api/products — fetch all products from the real database
 export async function GET() {
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+  })
+
   return successResponse(products, `${products.length} products found`)
 }
 
-// POST /api/products
+// POST /api/products — create a product in the real database
 export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    // Validate required fields
     if (!body.name || !body.price || !body.category) {
       return ApiErrors.badRequest(
         "Missing required fields: name, price, category"
       )
     }
 
-    const newProduct: Product = {
-      id: products.length + 1,
-      name: body.name,
-      slug: body.name.toLowerCase().replace(/\s+/g, "-"),
-      description: body.description ?? "",
-      price: Number(body.price),
-      inStock: body.inStock ?? true,
-      category: body.category,
-      imageUrl: body.imageUrl ?? "",
-    }
+    const product = await prisma.product.create({
+      data: {
+        name: body.name,
+        slug: body.name.toLowerCase().replace(/\s+/g, "-"),
+        description: body.description ?? "",
+        price: Number(body.price),
+        inStock: body.inStock ?? true,
+        category: body.category,
+        imageUrl: body.imageUrl ?? "",
+      },
+    })
 
-    products.push(newProduct)
-
-    return createdResponse(newProduct, "Product created successfully")
+    return createdResponse(product, "Product created successfully")
   } catch (error) {
-    return ApiErrors.badRequest("Invalid JSON in request body")
+    return ApiErrors.badRequest("Invalid request body")
   }
 }

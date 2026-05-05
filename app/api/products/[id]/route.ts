@@ -1,9 +1,6 @@
 // app/api/products/[id]/route.ts
-
-import { mockProducts } from "@/lib/mock-data"
+import { prisma } from "@/lib/prisma"
 import { successResponse, ApiErrors } from "@/lib/api-response"
-
-let products = [...mockProducts]
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -12,7 +9,10 @@ interface RouteParams {
 // GET /api/products/:id
 export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params
-  const product = products.find((p) => p.id === Number(id))
+
+  const product = await prisma.product.findUnique({
+    where: { id: Number(id) },
+  })
 
   if (!product) return ApiErrors.notFound("Product")
 
@@ -24,26 +24,29 @@ export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params
     const body = await request.json()
-    const index = products.findIndex((p) => p.id === Number(id))
 
-    if (index === -1) return ApiErrors.notFound("Product")
+    const product = await prisma.product.update({
+      where: { id: Number(id) },
+      data: body,
+    })
 
-    products[index] = { ...products[index], ...body }
-
-    return successResponse(products[index], "Product updated successfully")
+    return successResponse(product, "Product updated successfully")
   } catch (error) {
-    return ApiErrors.badRequest("Invalid JSON in request body")
+    return ApiErrors.notFound("Product")
   }
 }
 
 // DELETE /api/products/:id
 export async function DELETE(request: Request, { params }: RouteParams) {
-  const { id } = await params
-  const index = products.findIndex((p) => p.id === Number(id))
+  try {
+    const { id } = await params
 
-  if (index === -1) return ApiErrors.notFound("Product")
+    const product = await prisma.product.delete({
+      where: { id: Number(id) },
+    })
 
-  const deleted = products.splice(index, 1)[0]
-
-  return successResponse(deleted, "Product deleted successfully")
+    return successResponse(product, "Product deleted successfully")
+  } catch (error) {
+    return ApiErrors.notFound("Product")
+  }
 }
