@@ -1,45 +1,116 @@
 // app/products/page.tsx
-// This is a SERVER COMPONENT by default in Next.js App Router.
-// It runs on the server — perfect for data fetching.
-// No "use client" needed here.
+// Server Component — fetches data on the server, ships HTML to browser
+// No "use client" needed — no state, no interaction here
 
 import ProductCard from "@/components/ui/ProductCard"
-import { mockProducts } from "@/lib/mock-data"
+import { Product } from "@/types"
 
-export default function ProductsPage() {
-  // Right now: data comes from mock file
-  // Phase 4: this line becomes a Prisma DB query instead
-  const products = mockProducts
+import SearchBar from "@/components/ui/SearchBar"
+import CategoryFilter from "@/components/ui/CategoryFilter"
+
+// This function runs on the SERVER before the page renders
+async function getProducts(): Promise<Product[]> {
+  try {
+    // In production this would be your real domain
+    // process.env.NEXT_PUBLIC_API_URL is set in .env
+    const res = await fetch("http://localhost:3000/api/products", {
+      // Tell Next.js not to cache this — always get fresh data
+      cache: "no-store",
+    })
+
+    if (!res.ok) throw new Error("Failed to fetch products")
+
+    const json = await res.json()
+    return json.data
+  } catch (error) {
+    console.error("Failed to fetch products:", error)
+    return []
+  }
+}
+
+interface ProductsPageProps {
+  // Next.js passes URL query params here automatically
+  searchParams: Promise<{ 
+    year?: string
+    make?: string
+    model?: string
+    category?: string
+    search?: string
+  }>
+}
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const params = await searchParams
+  const products = await getProducts()
+
+  // Filter products client-side for now
+  // Phase 5 Step 3 moves this filter to the API query
+  const filtered = products.filter((p) => {
+    const matchesCategory = params.category
+      ? p.category === params.category
+      : true
+
+    const matchesSearch = params.search
+      ? p.name.toLowerCase().includes(params.search.toLowerCase()) ||
+        p.description?.toLowerCase().includes(params.search.toLowerCase())
+      : true
+
+    return matchesCategory && matchesSearch
+  })
+
+  // Get unique categories from products for the filter bar
+  const categories = ["All", ...new Set(products.map((p) => p.category))]
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
 
-      {/* Category Filter — static for now, logic comes in Phase 5 */}
-      <div className="flex gap-3 mb-8 flex-wrap">
-        {["All", "Engine", "Brakes", "Suspension"].map((cat) => (
-          <button
-            key={cat}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-gray-300 hover:bg-orange-500 hover:text-white transition-colors"
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">All Products</h1>
-        <p className="text-gray-400">
-          {products.length} parts available
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-white mb-1">All Products</h1>
+
+        {/* Show active YMM filter if present */}
+        {params.year && params.make && params.model && (
+          <p className="text-orange-400 text-sm">
+            Showing parts for: {params.year} {params.make} {params.model}
+          </p>
+        )}
+
+        <p className="text-gray-500 text-sm mt-1">
+          {filtered.length} parts found
         </p>
       </div>
-      
+
+      {/* Search Bar */}
+      <SearchBar defaultValue={params.search} />
+
+      {/* Category Filter */}
+      <CategoryFilter
+        categories={categories}
+        active={params.category}
+      />
+
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <div className="text-center py-24">
+          <p className="text-gray-500 text-lg">No products found.</p>
+          <a href="/products" className="text-orange-400 text-sm mt-2 inline-block">
+            Clear filters
+          </a>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
+
     </div>
   )
 }
+
+// ── SearchBar (Client Component — needs user input) ──────────────
+// Separate "use client" component inside the same file
+// This is a pattern: server page, client islands
+
+

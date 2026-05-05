@@ -87,7 +87,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
           {/* Price */}
           <div className="text-4xl font-bold text-white mb-4">
-            ${product.price.toFixed(2)}
+            ${parseFloat(String(product.price)).toFixed(2)}
           </div>
 
           {/* Stock Status */}

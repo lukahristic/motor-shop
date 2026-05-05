@@ -10,14 +10,22 @@ interface ProductCardProps {
   product: Product
 }
 
+
 export default function ProductCard({ product }: ProductCardProps) {
+
+  // Check if the image URL is valid and not empty
+  const imageSrc =
+  typeof product.imageUrl === "string" && product.imageUrl.trim() !== ""
+    ? product.imageUrl
+    : "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"
+    
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-orange-500 transition-colors group">
 
       {/* Product Image */}
       <div className="relative w-full h-48">
         <Image
-          src={product.imageUrl ?? "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"}
+          src={imageSrc}
           alt={product.name}
           fill
           className="object-cover"
@@ -47,9 +55,9 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Price + Stock + Button Row */}
         <div className="flex items-center justify-between mt-auto">
 
-          {/* Price */}
+          {/* Price — parseFloat handles both number and string from Prisma */}
           <span className="text-white font-bold text-lg">
-            ${product.price.toFixed(2)}
+            ${parseFloat(String(product.price)).toFixed(2)}
           </span>
 
           {/* Stock Badge */}
