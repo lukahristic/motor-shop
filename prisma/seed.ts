@@ -1,7 +1,4 @@
 // prisma/seed.ts
-// Seeds the database with initial data.
-// Run with: npx prisma db seed
-
 import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
@@ -9,14 +6,14 @@ const prisma = new PrismaClient()
 async function main() {
   console.log("🌱 Seeding database...")
 
-  // Clean existing data (order matters due to foreign keys)
+  // Clean existing data
   await prisma.productCompatibility.deleteMany()
   await prisma.product.deleteMany()
   await prisma.model.deleteMany()
   await prisma.make.deleteMany()
   await prisma.year.deleteMany()
 
-  // Seed Products
+  // ── Products ─────────────────────────────────────────
   const oilFilter = await prisma.product.create({
     data: {
       name: "Premium Oil Filter",
@@ -50,52 +47,97 @@ async function main() {
     },
   })
 
+  const airFilter = await prisma.product.create({
+    data: {
+      name: "Air Filter",
+      slug: "air-filter",
+      description: "High-flow air filter for improved throttle response.",
+      price: 19.99,
+      inStock: true,
+      category: "Engine",
+    },
+  })
+
+  const shockAbsorber = await prisma.product.create({
+    data: {
+      name: "Shock Absorber Pair",
+      slug: "shock-absorber-pair",
+      description: "Heavy-duty shock absorbers for a smoother ride.",
+      price: 129.99,
+      inStock: true,
+      category: "Suspension",
+    },
+  })
+
   console.log("✅ Products seeded")
 
-  // Seed YMM data
-  const year2022 = await prisma.year.create({ data: { year: 2022 } })
-  const year2023 = await prisma.year.create({ data: { year: 2023 } })
+  // ── YMM Data ──────────────────────────────────────────
+  const ymmData = {
+    2021: {
+      Toyota: ["Camry", "Corolla", "RAV4"],
+      Honda:  ["Civic", "Accord", "CR-V"],
+      Ford:   ["Ranger", "Everest"],
+    },
+    2022: {
+      Toyota: ["Camry", "Corolla", "RAV4", "GR86"],
+      Honda:  ["Civic", "Accord", "CR-V", "BRV"],
+      Ford:   ["Ranger", "Everest", "Mustang"],
+      Nissan: ["Navara", "Terra", "Almera"],
+    },
+    2023: {
+      Toyota:     ["Camry", "Corolla", "Vios", "Fortuner"],
+      Honda:      ["Civic", "Accord", "CR-V"],
+      Nissan:     ["Navara", "Terra", "Almera"],
+      Mitsubishi: ["Strada", "Montero", "Xpander"],
+    },
+  }
 
-  // 2022 makes
-  const toyota2022 = await prisma.make.create({
-    data: { name: "Toyota", yearId: year2022.id },
-  })
-  const honda2022 = await prisma.make.create({
-    data: { name: "Honda", yearId: year2022.id },
-  })
+  // Track created models for compatibility linking
+  const createdModels: Record<string, number> = {}
 
-  // 2022 Toyota models
-  const camry2022 = await prisma.model.create({
-    data: { name: "Camry", makeId: toyota2022.id },
-  })
-  const corolla2022 = await prisma.model.create({
-    data: { name: "Corolla", makeId: toyota2022.id },
-  })
+  for (const [yearNum, makes] of Object.entries(ymmData)) {
+    const year = await prisma.year.create({
+      data: { year: Number(yearNum) },
+    })
 
-  // 2023 makes
-  const toyota2023 = await prisma.make.create({
-    data: { name: "Toyota", yearId: year2023.id },
-  })
+    for (const [makeName, models] of Object.entries(makes)) {
+      const make = await prisma.make.create({
+        data: { name: makeName, yearId: year.id },
+      })
 
-  const camry2023 = await prisma.model.create({
-    data: { name: "Camry", makeId: toyota2023.id },
-  })
+      for (const modelName of models) {
+        const model = await prisma.model.create({
+          data: { name: modelName, makeId: make.id },
+        })
+        // Store with a key like "2022-Toyota-Camry"
+        createdModels[`${yearNum}-${makeName}-${modelName}`] = model.id
+      }
+    }
+  }
 
   console.log("✅ YMM data seeded")
 
-  // Link oil filter to 2022 Toyota Camry and Corolla
-  await prisma.productCompatibility.createMany({
-    data: [
-      { productId: oilFilter.id, modelId: camry2022.id },
-      { productId: oilFilter.id, modelId: corolla2022.id },
-      { productId: oilFilter.id, modelId: camry2023.id },
-      { productId: brakePads.id, modelId: camry2022.id },
-      { productId: sparkPlugs.id, modelId: corolla2022.id },
-    ],
-  })
+  // ── Product Compatibility ─────────────────────────────
+  const compatibilities = [
+    { product: oilFilter,     vehicles: ["2022-Toyota-Camry", "2022-Toyota-Corolla", "2023-Toyota-Camry"] },
+    { product: brakePads,     vehicles: ["2022-Toyota-Camry", "2022-Honda-Civic", "2023-Honda-Civic"] },
+    { product: sparkPlugs,    vehicles: ["2022-Toyota-Corolla", "2021-Toyota-Corolla"] },
+    { product: airFilter,     vehicles: ["2022-Ford-Ranger", "2023-Mitsubishi-Strada", "2021-Ford-Ranger"] },
+    { product: shockAbsorber, vehicles: ["2022-Nissan-Navara", "2023-Nissan-Navara", "2021-Honda-CR-V"] },
+  ]
+
+  for (const { product, vehicles } of compatibilities) {
+    for (const vehicleKey of vehicles) {
+      const modelId = createdModels[vehicleKey]
+      if (!modelId) continue
+      await prisma.productCompatibility.create({
+        data: { productId: product.id, modelId },
+      })
+    }
+  }
 
   console.log("✅ Product compatibility seeded")
-  console.log("🎉 Seeding complete!")
+  console.log("🎉 Done!")
 }
 
 main()
