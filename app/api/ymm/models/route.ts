@@ -1,6 +1,5 @@
 // app/api/ymm/models/route.ts
-
-import { ymmData } from "@/lib/mock-data"
+import { prisma } from "@/lib/prisma"
 import { successResponse, ApiErrors } from "@/lib/api-response"
 
 export async function GET(request: Request) {
@@ -12,8 +11,15 @@ export async function GET(request: Request) {
     return ApiErrors.badRequest("Missing required query params: year, make")
   }
 
-  if (!ymmData[year]?.[make]) return ApiErrors.notFound("Make")
+  const makeRecord = await prisma.make.findFirst({
+    where: {
+      name: make,
+      year: { year: Number(year) },
+    },
+    include: { models: true },
+  })
 
-  const models = ymmData[year][make]
-  return successResponse(models)
+  if (!makeRecord) return ApiErrors.notFound("Make")
+
+  return successResponse(makeRecord.models.map((m) => m.name))
 }

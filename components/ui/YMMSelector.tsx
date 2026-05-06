@@ -1,66 +1,153 @@
 // components/ui/YMMSelector.tsx
-// "use client" is REQUIRED here because we use useState
-// This component runs in the browser, not on the server
-
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ymmData } from "@/lib/mock-data"
 
 export default function YMMSelector() {
   const router = useRouter()
 
-  // Three pieces of state — one per dropdown
-  // Each one starts empty (nothing selected)
+  // Selection state
   const [selectedYear, setSelectedYear]   = useState<string>("")
   const [selectedMake, setSelectedMake]   = useState<string>("")
   const [selectedModel, setSelectedModel] = useState<string>("")
 
-  // --- Derived data (computed from state, not stored separately) ---
+  // Data state — fetched from real API
+  const [years, setYears]   = useState<string[]>([])
+  const [makes, setMakes]   = useState<string[]>([])
+  const [models, setModels] = useState<string[]>([])
 
-  // Available makes = keys of the selected year's data
-  // If no year selected, empty array
-  const availableMakes: string[] = selectedYear
-    ? Object.keys(ymmData[selectedYear])
-    : []
+  // Loading states — one per dropdown
+  const [loadingYears,  setLoadingYears]  = useState(true)
+  const [loadingMakes,  setLoadingMakes]  = useState(false)
+  const [loadingModels, setLoadingModels] = useState(false)
 
-  // Available models = array under selected year + make
-  const availableModels: string[] = selectedYear && selectedMake
-    ? ymmData[selectedYear][selectedMake]
-    : []
+  // ── Fetch years on mount ──────────────────────────────
+  useEffect(() => {
+    async function fetchYears() {
+      try {
+        const res  = await fetch("/api/ymm/years")
+        const json = await res.json()
+        setYears(json.data.map(String))
+      } catch (err) {
+        console.error("Failed to fetch years:", err)
+      } finally {
+        setLoadingYears(false)
+      }
+    }
+    fetchYears()
+  }, []) // empty array = runs once on mount
 
-  // --- Event Handlers ---
+  // ── Fetch makes when year changes ─────────────────────
+  useEffect(() => {
+    if (!selectedYear) {
+      setMakes([])
+      return
+    }
 
+    async function fetchMakes() {
+      setLoadingMakes(true)
+      try {
+        const res  = await fetch(`/api/ymm/makes?year=${selectedYear}`)
+        const json = await res.json()
+        setMakes(json.data)
+      } catch (err) {
+        console.error("Failed to fetch makes:", err)
+      } finally {
+        setLoadingMakes(false)
+      }
+    }
+    fetchMakes()
+  }, [selectedYear]) // runs every time selectedYear changes
+
+  // ── Fetch models when make changes ────────────────────
+  useEffect(() => {
+    if (!selectedYear || !selectedMake) {
+      setModels([])
+      return
+    }
+
+    async function fetchModels() {
+      setLoadingModels(true)
+      try {
+        const res  = await fetch(`/api/ymm/models?year=${selectedYear}&make=${selectedMake}`)
+        const json = await res.json()
+        setModels(json.data)
+      } catch (err) {
+        console.error("Failed to fetch models:", err)
+      } finally {
+        setLoadingModels(false)
+      }
+    }
+    fetchModels()
+  }, [selectedYear, selectedMake]) // runs when either changes
+
+  // ── Handlers ──────────────────────────────────────────
   function handleYearChange(year: string) {
     setSelectedYear(year)
-    // Reset downstream selections when year changes
     setSelectedMake("")
     setSelectedModel("")
+    setMakes([])
+    setModels([])
   }
 
   function handleMakeChange(make: string) {
     setSelectedMake(make)
-    // Reset model when make changes
     setSelectedModel("")
+    setModels([])
   }
 
   function handleSearch() {
     if (!selectedYear || !selectedMake || !selectedModel) return
-
-    // Navigate to products page with YMM as query params
-    // e.g. /products?year=2022&make=Toyota&model=Camry
     router.push(
       `/products?year=${selectedYear}&make=${selectedMake}&model=${selectedModel}`
     )
   }
 
-  // Is the search button ready to activate?
   const isReady = selectedYear && selectedMake && selectedModel
+
+  // ── Reusable dropdown renderer ─────────────────────────
+  function Dropdown({
+    label,
+    value,
+    options,
+    disabled,
+    loading,
+    placeholder,
+    onChange,
+  }: {
+    label: string
+    value: string
+    options: string[]
+    disabled: boolean
+    loading: boolean
+    placeholder: string
+    onChange: (val: string) => void
+  }) {
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-gray-400 text-xs font-medium uppercase tracking-wide">
+          {label}
+        </label>
+        <select
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled || loading}
+          className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          <option value="">
+            {loading ? "Loading..." : placeholder}
+          </option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-3xl mx-auto">
-
       <h2 className="text-white font-bold text-lg mb-1">
         Find Parts for Your Vehicle
       </h2>
@@ -68,68 +155,36 @@ export default function YMMSelector() {
         Select your vehicle to see compatible parts
       </p>
 
-      {/* Dropdowns Row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-
-        {/* Year Dropdown */}
-        <div className="flex flex-col gap-1">
-          <label className="text-gray-400 text-xs font-medium uppercase tracking-wide">
-            Year
-          </label>
-          <select
-            value={selectedYear}
-            onChange={(e) => handleYearChange(e.target.value)}
-            className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
-          >
-            <option value="">Select year</option>
-            {Object.keys(ymmData)
-              .sort((a, b) => Number(b) - Number(a)) // newest first
-              .map((year) => (
-                <option key={year} value={year}>{year}</option>
-              ))
-            }
-          </select>
-        </div>
-
-        {/* Make Dropdown */}
-        <div className="flex flex-col gap-1">
-          <label className="text-gray-400 text-xs font-medium uppercase tracking-wide">
-            Make
-          </label>
-          <select
-            value={selectedMake}
-            onChange={(e) => handleMakeChange(e.target.value)}
-            disabled={!selectedYear} // locked until year is chosen
-            className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <option value="">Select make</option>
-            {availableMakes.map((make) => (
-              <option key={make} value={make}>{make}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Model Dropdown */}
-        <div className="flex flex-col gap-1">
-          <label className="text-gray-400 text-xs font-medium uppercase tracking-wide">
-            Model
-          </label>
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            disabled={!selectedMake} // locked until make is chosen
-            className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <option value="">Select model</option>
-            {availableModels.map((model) => (
-              <option key={model} value={model}>{model}</option>
-            ))}
-          </select>
-        </div>
-
+        <Dropdown
+          label="Year"
+          value={selectedYear}
+          options={years}
+          disabled={false}
+          loading={loadingYears}
+          placeholder="Select year"
+          onChange={handleYearChange}
+        />
+        <Dropdown
+          label="Make"
+          value={selectedMake}
+          options={makes}
+          disabled={!selectedYear}
+          loading={loadingMakes}
+          placeholder="Select make"
+          onChange={handleMakeChange}
+        />
+        <Dropdown
+          label="Model"
+          value={selectedModel}
+          options={models}
+          disabled={!selectedMake}
+          loading={loadingModels}
+          placeholder="Select model"
+          onChange={(val) => setSelectedModel(val)}
+        />
       </div>
 
-      {/* Search Button */}
       <button
         onClick={handleSearch}
         disabled={!isReady}
@@ -144,7 +199,6 @@ export default function YMMSelector() {
           : "Select your vehicle above"
         }
       </button>
-
     </div>
   )
 }

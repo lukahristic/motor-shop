@@ -1,9 +1,12 @@
 // app/api/ymm/years/route.ts
-
-import { ymmData } from "@/lib/mock-data"
+import { prisma } from "@/lib/prisma"
 import { successResponse } from "@/lib/api-response"
 
 export async function GET() {
-  const years = Object.keys(ymmData).sort((a, b) => Number(b) - Number(a))
-  return successResponse(years)
+  const years = await prisma.year.findMany({
+    orderBy: { year: "desc" },
+  })
+
+  // Return just the year numbers, not the full DB objects
+  return successResponse(years.map((y) => y.year))
 }
