@@ -5,27 +5,29 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Product } from "@/types"
+import { FALLBACK_IMAGE } from "@/lib/constants"
+
 
 interface ProductCardProps {
   product: Product
 }
 
+function getImageSrc(imageUrl?: string | null): string {
+  if (!imageUrl || imageUrl.trim() === "") return FALLBACK_IMAGE
+  return imageUrl
+}
+
 
 export default function ProductCard({ product }: ProductCardProps) {
 
-  // Check if the image URL is valid and not empty
-  const imageSrc =
-  typeof product.imageUrl === "string" && product.imageUrl.trim() !== ""
-    ? product.imageUrl
-    : "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"
-    
+
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-orange-500 transition-colors group">
 
       {/* Product Image */}
       <div className="relative w-full h-48">
         <Image
-          src={imageSrc}
+          src={getImageSrc(product.imageUrl)}
           alt={product.name}
           fill
           className="object-cover"
