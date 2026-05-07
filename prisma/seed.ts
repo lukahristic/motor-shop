@@ -122,7 +122,7 @@ async function main() {
     { product: oilFilter,     vehicles: ["2022-Toyota-Camry", "2022-Toyota-Corolla", "2023-Toyota-Camry"] },
     { product: brakePads,     vehicles: ["2022-Toyota-Camry", "2022-Honda-Civic", "2023-Honda-Civic"] },
     { product: sparkPlugs,    vehicles: ["2022-Toyota-Corolla", "2021-Toyota-Corolla"] },
-    { product: airFilter,     vehicles: ["2022-Ford-Ranger", "2023-Mitsubishi-Strada", "2021-Ford-Ranger"] },
+    { product: airFilter,     vehicles: ["2022-Ford-Ranger", "2023-Mitsubishi-Strada", "2021-Ford-Ranger", "2023-Mitsubishi-Xpander"] },
     { product: shockAbsorber, vehicles: ["2022-Nissan-Navara", "2023-Nissan-Navara", "2021-Honda-CR-V"] },
   ]
 
