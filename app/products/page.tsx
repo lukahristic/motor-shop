@@ -1,22 +1,26 @@
 // app/products/page.tsx
-// Server Component — fetches data on the server, ships HTML to browser
-// No "use client" needed — no state, no interaction here
-
 import ProductCard from "@/components/ui/ProductCard"
-import { Product } from "@/types"
-
 import SearchBar from "@/components/ui/SearchBar"
 import CategoryFilter from "@/components/ui/CategoryFilter"
+import { Product } from "@/types"
 
-// This function runs on the SERVER before the page renders
-async function getProducts(): Promise<Product[]> {
+// Fetches products — uses YMM endpoint if vehicle params exist,
+// otherwise fetches all products
+async function getProducts(params: {
+  year?: string
+  make?: string
+  model?: string
+}): Promise<Product[]> {
   try {
-    // In production this would be your real domain
-    // process.env.NEXT_PUBLIC_API_URL is set in .env
-    const res = await fetch("http://localhost:3000/api/products", {
-      // Tell Next.js not to cache this — always get fresh data
-      cache: "no-store",
-    })
+    const { year, make, model } = params
+
+    // If all three YMM params exist, use the vehicle-specific endpoint
+    const url =
+      year && make && model
+        ? `http://localhost:3000/api/products/by-vehicle?year=${year}&make=${make}&model=${model}`
+        : "http://localhost:3000/api/products"
+
+    const res = await fetch(url, { cache: "no-store" })
 
     if (!res.ok) throw new Error("Failed to fetch products")
 
@@ -29,8 +33,7 @@ async function getProducts(): Promise<Product[]> {
 }
 
 interface ProductsPageProps {
-  // Next.js passes URL query params here automatically
-  searchParams: Promise<{ 
+  searchParams: Promise<{
     year?: string
     make?: string
     model?: string
@@ -41,10 +44,15 @@ interface ProductsPageProps {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = await searchParams
-  const products = await getProducts()
 
-  // Filter products client-side for now
-  // Phase 5 Step 3 moves this filter to the API query
+  // Fetch products — filtered by vehicle if YMM params exist
+  const products = await getProducts({
+    year: params.year,
+    make: params.make,
+    model: params.model,
+  })
+
+  // Apply category + search filters on top of YMM results
   const filtered = products.filter((p) => {
     const matchesCategory = params.category
       ? p.category === params.category
@@ -58,21 +66,29 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     return matchesCategory && matchesSearch
   })
 
-  // Get unique categories from products for the filter bar
   const categories = ["All", ...new Set(products.map((p) => p.category))]
+  const hasVehicleFilter = params.year && params.make && params.model
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
 
-      {/* Page Header */}
+      {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-1">All Products</h1>
+        <h1 className="text-3xl font-bold text-white mb-1">
+          {hasVehicleFilter ? "Parts for Your Vehicle" : "All Products"}
+        </h1>
 
-        {/* Show active YMM filter if present */}
-        {params.year && params.make && params.model && (
-          <p className="text-orange-400 text-sm">
-            Showing parts for: {params.year} {params.make} {params.model}
-          </p>
+        {/* Active vehicle badge */}
+        {hasVehicleFilter && (
+          <div className="flex items-center gap-3 mt-2">
+            <span className="text-orange-400 text-sm font-medium">
+              {params.year} {params.make} {params.model}
+            </span>
+            
+            <a href="/products" className="text-xs text-gray-500 hover:text-gray-300 underline transition-colors">
+              Clear vehicle filter
+            </a>
+          </div>
         )}
 
         <p className="text-gray-500 text-sm mt-1">
@@ -80,21 +96,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         </p>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       <SearchBar defaultValue={params.search} />
 
-      {/* Category Filter */}
-      <CategoryFilter
-        categories={categories}
-        active={params.category}
-      />
+      {/* Category filter */}
+      <CategoryFilter categories={categories} active={params.category} />
 
-      {/* Product Grid */}
+      {/* Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-24">
-          <p className="text-gray-500 text-lg">No products found.</p>
-          <a href="/products" className="text-orange-400 text-sm mt-2 inline-block">
-            Clear filters
+          <p className="text-gray-500 text-lg mb-2">
+            {hasVehicleFilter
+              ? `No parts found for ${params.year} ${params.make} ${params.model}`
+              : "No products found."
+            }
+          </p>
+          
+            <a href="/products" className="text-orange-400 text-sm hover:text-orange-300 transition-colors">
+            Browse all products
           </a>
         </div>
       ) : (
@@ -108,9 +127,3 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     </div>
   )
 }
-
-// ── SearchBar (Client Component — needs user input) ──────────────
-// Separate "use client" component inside the same file
-// This is a pattern: server page, client islands
-
-
