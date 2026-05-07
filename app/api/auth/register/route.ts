@@ -5,6 +5,8 @@
 import { prisma }                          from "@/lib/prisma"
 import { hashPassword, createToken }       from "@/lib/auth"
 import { createdResponse, ApiErrors }      from "@/lib/api-response"
+import { cookies } from "next/headers"
+
 
 export async function POST(request: Request) {
   try {
@@ -58,6 +60,15 @@ export async function POST(request: Request) {
       id:    user.id,
       email: user.email,
       role:  user.role,
+    })
+
+    const cookieStore = await cookies()
+    cookieStore.set("auth-token", token, {
+      httpOnly: true,
+      secure:   process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge:   60 * 60 * 24 * 7,
+      path:     "/",
     })
 
     // Return token + safe user data (never return the password)

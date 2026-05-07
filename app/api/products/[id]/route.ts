@@ -1,6 +1,9 @@
 // app/api/products/[id]/route.ts
 import { prisma } from "@/lib/prisma"
 import { successResponse, ApiErrors } from "@/lib/api-response"
+import { getUserFromHeaders } from "@/lib/get-user"
+
+
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -38,13 +41,17 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
 // DELETE /api/products/:id
 export async function DELETE(request: Request, { params }: RouteParams) {
+  const user = getUserFromHeaders(request)
+  if (!user) return ApiErrors.unauthorized()
+
+  // Only admins can delete products
+  if (user.role !== "ADMIN") return ApiErrors.forbidden()
+
   try {
     const { id } = await params
-
     const product = await prisma.product.delete({
       where: { id: Number(id) },
     })
-
     return successResponse(product, "Product deleted successfully")
   } catch (error) {
     return ApiErrors.notFound("Product")

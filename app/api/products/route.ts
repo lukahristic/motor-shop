@@ -1,6 +1,8 @@
 // app/api/products/route.ts
 import { prisma } from "@/lib/prisma"
 import { successResponse, createdResponse, ApiErrors } from "@/lib/api-response"
+import { getUserFromHeaders } from "@/lib/get-user"
+
 
 // GET /api/products — fetch all products from the real database
 export async function GET() {
@@ -14,6 +16,10 @@ export async function GET() {
 // POST /api/products — create a product in the real database
 export async function POST(request: Request) {
   try {
+
+    const user = getUserFromHeaders(request)
+
+  if (!user) return ApiErrors.unauthorized()
     const body = await request.json()
 
     if (!body.name || !body.price || !body.category) {
