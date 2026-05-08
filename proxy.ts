@@ -1,4 +1,4 @@
-// middleware.ts
+// proxy.ts
 // Runs before EVERY request that matches the config below.
 // Protects routes based on authentication and role.
 
