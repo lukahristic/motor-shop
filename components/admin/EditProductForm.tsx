@@ -9,10 +9,10 @@ import { useRouter } from "next/navigation"
 import Link          from "next/link"
 
 // We use Prisma's generated type here for full accuracy
-import type { Product } from "@prisma/client"
+import { SerializedProduct } from "@/types"
 
 interface Props {
-  product: Product
+  product: SerializedProduct  // ← plain object, safe for client
 }
 
 export default function EditProductForm({ product }: Props) {

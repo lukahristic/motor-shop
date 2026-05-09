@@ -29,8 +29,6 @@ export interface User {
   role: "ADMIN" | "USER"
 }
 
-// types/index.ts
-
 // Serialized version of the Prisma Product — safe to pass to Client Components
 // Converts Decimal → number, Date → string
 export interface SerializedProduct {
