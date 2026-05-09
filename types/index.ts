@@ -28,3 +28,20 @@ export interface User {
   email: string
   role: "ADMIN" | "USER"
 }
+
+// types/index.ts
+
+// Serialized version of the Prisma Product — safe to pass to Client Components
+// Converts Decimal → number, Date → string
+export interface SerializedProduct {
+  id:          number
+  name:        string
+  slug:        string
+  description: string | null
+  price:       number           // ← plain number, not Prisma Decimal
+  inStock:     boolean
+  imageUrl:    string | null
+  category:    string
+  createdAt:   string           // ← plain string, not Date object
+  updatedAt:   string
+}
