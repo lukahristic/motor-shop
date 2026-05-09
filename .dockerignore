@@ -1,0 +1,44 @@
+# Dependencies — installed in image via npm ci
+node_modules
+.pnp
+.pnp.*
+
+# Next.js — built inside the image
+.next
+out
+
+# Git and VCS
+.git
+.gitignore
+
+# Tests and coverage
+coverage
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Env and secrets (inject at runtime or via build args if needed)
+.env
+.env.*
+!.env.example
+
+# Tooling / IDE
+.cursor
+.vscode
+.idea
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.pem
+.vercel
+*.tsbuildinfo

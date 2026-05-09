@@ -4,6 +4,10 @@
 
 import Link from "next/link"
 
+// Admin pages read from the DB; skip static generation so `next build` works
+// without DATABASE_URL (e.g. Docker builder stage).
+export const dynamic = "force-dynamic"
+
 export default function AdminLayout({
   children,
 }: {
