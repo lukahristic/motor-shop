@@ -43,3 +43,22 @@ export interface SerializedProduct {
   createdAt:   string           // ← plain string, not Date object
   updatedAt:   string
 }
+
+export interface SerializedModel {
+  id:     number
+  name:   string
+  makeId: number
+}
+
+export interface SerializedMake {
+  id:     number
+  name:   string
+  yearId: number
+  models: SerializedModel[]
+}
+
+export interface SerializedYear {
+  id:    number
+  year:  number
+  makes: SerializedMake[]
+}
