@@ -92,17 +92,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
 
           {/* Add to Cart Button — not functional yet, wired up later */}
-          <button
-            disabled={!product.inStock}
-            className={`py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-              product.inStock
-                ? "bg-orange-500 hover:bg-orange-600 cursor-pointer"
-                : "bg-gray-700 cursor-not-allowed opacity-50"
-            }`}
-          >
-            {product.inStock ? "Add to Cart" : "Unavailable"}
-          </button>
-
+          <Link href="/cart"> 
+            <button
+              disabled={!product.inStock}
+              className={`py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                product.inStock
+                  ? "bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                  : "bg-gray-700 cursor-not-allowed opacity-50"
+              }`}
+            >
+              {product.inStock ? "Add to Cart" : "Unavailable"}
+            </button>
+          </Link>
         </div>
       </div>
 
