@@ -2,8 +2,8 @@
 // GET /api/products/by-vehicle?year=2022&make=Toyota&model=Camry
 // Returns only products compatible with the specified vehicle
 
-import { prisma } from "@/lib/prisma"
 import { successResponse, ApiErrors } from "@/lib/api-response"
+import { getProductsByVehicle } from "@/lib/products-data"
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -18,33 +18,13 @@ export async function GET(request: Request) {
     )
   }
 
-  // Find the specific model record in the database
-  // We navigate: year → make → model
-  const modelRecord = await prisma.model.findFirst({
-    where: {
-      name: model,
-      make: {
-        name: make,
-        year: { year: Number(year) },
-      },
-    },
-  })
+  const result = await getProductsByVehicle({ year, make, model })
 
-  if (!modelRecord) {
+  if (!result.vehicleFound) {
     return ApiErrors.notFound("Vehicle")
   }
 
-  // Find all products compatible with this model
-  // Through the ProductCompatibility join table
-  const compatibilities = await prisma.productCompatibility.findMany({
-    where: { modelId: modelRecord.id },
-    include: {
-      product: true, // fetch the full product data
-    },
-  })
-
-  // Extract just the products from the compatibility records
-  const products = compatibilities.map((c) => c.product)
+  const { products } = result
 
   return successResponse(
     products,

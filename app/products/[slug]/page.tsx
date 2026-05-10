@@ -1,35 +1,25 @@
 // app/products/[slug]/page.tsx
 // This page renders for ANY route matching /products/:slug
-// e.g. /products/premium-oil-filter, /products/ceramic-brake-pads
 
 import Image from "next/image"
 import Link from "next/link"
-import { mockProducts } from "@/lib/mock-data"
 import { notFound } from "next/navigation"
+import { getProductDetailBySlug } from "@/lib/products-data"
+import { FALLBACK_IMAGE } from "@/lib/constants"
+
+// Resolve product by slug at request time (no DB required during `next build`)
+export const dynamic = "force-dynamic"
 
 // Next.js passes route params to every page component automatically
 interface PageProps {
   params: Promise<{ slug: string }>
 }
 
-// This tells Next.js which slugs exist at build time
-// so it can pre-render those pages as static HTML — much faster
-// Phase 4: this becomes a DB query too
-export async function generateStaticParams() {
-    return mockProducts.map((product) => ({
-      slug: product.slug,
-    }))
-  }
-
 export default async function ProductDetailPage({ params }: PageProps) {
-  // Unwrap the params (required in Next.js 15+)
   const { slug } = await params
 
-  // Find the product that matches the slug from the URL
-  // Phase 4: this becomes → prisma.product.findUnique({ where: { slug } })
-  const product = mockProducts.find((p) => p.slug === slug)
+  const product = await getProductDetailBySlug(slug)
 
-  // If no product found, show Next.js built-in 404 page
   if (!product) {
     notFound()
   }
@@ -51,7 +41,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Left — Image */}
         <div className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-800">
           <Image
-            src={product.imageUrl ?? "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"}
+            src={product.imageUrl?.trim() ? product.imageUrl : FALLBACK_IMAGE}
             alt={product.name}
             fill
             className="object-cover"

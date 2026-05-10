@@ -3,35 +3,11 @@ import ProductCard from "@/components/ui/ProductCard"
 import SearchBar from "@/components/ui/SearchBar"
 import CategoryFilter from "@/components/ui/CategoryFilter"
 import { Product } from "@/types"
+import {
+  getAllProductsForCatalog,
+  getProductsByVehicle,
+} from "@/lib/products-data"
 
-// Fetches products — uses YMM endpoint if vehicle params exist,
-// otherwise fetches all products
-// async function getProducts(params: {
-//   year?: string
-//   make?: string
-//   model?: string
-// }): Promise<Product[]> {
-//   try {
-//     const { year, make, model } = params
-
-//     // If all three YMM params exist, use the vehicle-specific endpoint
-//     const url =
-//       year && make && model
-//         ? `http://localhost:3000/api/products/by-vehicle?year=${year}&make=${make}&model=${model}`
-//         : "http://localhost:3000/api/products"
-
-//     const res = await fetch(url, { cache: "no-store" })
-
-//     if (!res.ok) throw new Error("Failed to fetch products")
-
-//     const json = await res.json()
-//     return json.data
-//   } catch (error) {
-//     console.error("Failed to fetch products:", error)
-//     return []
-//   }
-// }
-// Replace hardcoded localhost with environment variable
 async function getProducts(params: {
   year?: string
   make?: string
@@ -39,18 +15,14 @@ async function getProducts(params: {
 }): Promise<Product[]> {
   try {
     const { year, make, model } = params
-    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
-    const url =
-      year && make && model
-        ? `${base}/api/products/by-vehicle?year=${year}&make=${make}&model=${model}`
-        : `${base}/api/products`
+    if (year && make && model) {
+      const result = await getProductsByVehicle({ year, make, model })
+      if (!result.vehicleFound) return []
+      return result.products
+    }
 
-    const res = await fetch(url, { cache: "no-store" })
-    if (!res.ok) throw new Error("Failed to fetch products")
-
-    const json = await res.json()
-    return json.data
+    return getAllProductsForCatalog()
   } catch (error) {
     console.error("Failed to fetch products:", error)
     return []

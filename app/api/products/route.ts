@@ -2,13 +2,11 @@
 import { prisma } from "@/lib/prisma"
 import { successResponse, createdResponse, ApiErrors } from "@/lib/api-response"
 import { getUserFromHeaders } from "@/lib/get-user"
-
+import { getAllProductsForCatalog } from "@/lib/products-data"
 
 // GET /api/products — fetch all products from the real database
 export async function GET() {
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: "desc" },
-  })
+  const products = await getAllProductsForCatalog()
 
   return successResponse(products, `${products.length} products found`)
 }
@@ -19,7 +17,8 @@ export async function POST(request: Request) {
 
     const user = getUserFromHeaders(request)
 
-  if (!user) return ApiErrors.unauthorized()
+    if (!user) return ApiErrors.unauthorized()
+      
     const body = await request.json()
 
     if (!body.name || !body.price || !body.category) {
