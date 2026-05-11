@@ -6,15 +6,13 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center py-16 px-6 text-center">
-        <h1 className="text-5xl font-bold text-orange-500 mb-4">
+      <section className="flex flex-col items-center justify-center py-12 sm:py-24 px-4 sm:px-6 text-center">
+        <h1 className="text-4xl sm:text-5xl font-bold text-orange-500 mb-4">
           Motor Shop
         </h1>
-        <p className="text-xl text-gray-400 max-w-xl mb-10">
+        <p className="text-lg sm:text-xl text-gray-400 max-w-xl mb-8 sm:mb-10">
           Find the right parts for your vehicle. Search by Year, Make, and Model.
         </p>
-
-        {/* YMM Selector lives here on the homepage */}
         <YMMSelector />
       </section>
 

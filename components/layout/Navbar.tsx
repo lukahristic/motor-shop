@@ -4,7 +4,7 @@
 import Link          from "next/link"
 import { useAuth }   from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
-import CartIcon from "@/components/ui/CartIcon"
+import CartIcon      from "@/components/ui/CartIcon"
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth()
@@ -16,24 +16,25 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-gray-950 border-b border-gray-800 px-6 py-4">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
+    <nav className="bg-gray-950 border-b border-gray-800 px-4 lg:px-6 py-4">
+      <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
 
         {/* Logo */}
-        <Link href="/" className="text-orange-500 font-bold text-xl tracking-tight">
+        <Link
+          href="/"
+          className="text-orange-500 font-bold text-xl tracking-tight shrink-0"
+        >
           MotorShop
         </Link>
 
-        {/* Nav links */}
-        <div className="flex items-center gap-6">
+        {/* Desktop nav links — hidden on mobile */}
+        <div className="hidden md:flex items-center gap-6">
           <Link
             href="/products"
             className="text-gray-400 hover:text-white text-sm transition-colors"
           >
             Products
           </Link>
-
-          {/* Show admin link only for admins */}
           {user?.role === "ADMIN" && (
             <Link
               href="/admin"
@@ -42,39 +43,38 @@ export default function Navbar() {
               Admin
             </Link>
           )}
-          
+        </div>
+
+        {/* Right side — always visible */}
+        <div className="flex items-center gap-3">
+
+          {/* Cart icon */}
           <CartIcon />
 
-
-          {/* Auth buttons — change based on login state */}
+          {/* Auth state */}
           {loading ? (
-            // Don't flash login/logout while checking auth
-            <div className="w-20 h-8 bg-gray-800 rounded-lg animate-pulse" />
+            <div className="w-16 h-8 bg-gray-800 rounded-lg animate-pulse" />
           ) : user ? (
-            // Logged in state
-            <div className="flex items-center gap-4">
-              <span className="text-gray-400 text-sm">
+            <div className="flex items-center gap-3">
+              {/* Name — hidden on very small screens */}
+              <span className="hidden sm:block text-gray-400 text-sm truncate max-w-[120px]">
                 {user.name}
               </span>
-              {user && (
-                <Link
-                  href="/orders"
-                  className="text-gray-400 hover:text-white text-sm transition-colors"
-                >
-                  My Orders
-                </Link>
-              )}
-
+              <Link
+                href="/orders"
+                className="hidden md:block text-gray-400 hover:text-white text-sm transition-colors"
+              >
+                Orders
+              </Link>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white text-sm transition-colors"
               >
                 Logout
               </button>
             </div>
           ) : (
-            // Logged out state
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Link
                 href="/login"
                 className="text-gray-400 hover:text-white text-sm transition-colors"
@@ -83,7 +83,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
+                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-lg transition-colors"
               >
                 Register
               </Link>
@@ -91,6 +91,32 @@ export default function Navbar() {
           )}
         </div>
 
+      </div>
+
+      {/* Mobile bottom row — only shows on small screens */}
+      <div className="md:hidden flex items-center gap-4 mt-3 pt-3 border-t border-gray-800">
+        <Link
+          href="/products"
+          className="text-gray-400 hover:text-white text-sm transition-colors"
+        >
+          Products
+        </Link>
+        {user?.role === "ADMIN" && (
+          <Link
+            href="/admin"
+            className="text-orange-400 hover:text-orange-300 text-sm transition-colors"
+          >
+            Admin
+          </Link>
+        )}
+        {user && (
+          <Link
+            href="/orders"
+            className="text-gray-400 hover:text-white text-sm transition-colors"
+          >
+            My Orders
+          </Link>
+        )}
       </div>
     </nav>
   )

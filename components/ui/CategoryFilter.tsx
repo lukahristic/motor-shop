@@ -26,7 +26,7 @@ export default function CategoryFilter({
   }
 
   return (
-    <div className="flex gap-3 mb-8 flex-wrap">
+    <div className="flex gap-2 sm:gap-3 mb-6 sm:mb-8 flex-wrap">
       {categories.map((cat) => (
         <button
           key={cat}

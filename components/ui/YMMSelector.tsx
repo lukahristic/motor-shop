@@ -147,7 +147,7 @@ export default function YMMSelector() {
   }
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-3xl mx-auto">
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 w-full max-w-3xl mx-auto">
       <h2 className="text-white font-bold text-lg mb-1">
         Find Parts for Your Vehicle
       </h2>
