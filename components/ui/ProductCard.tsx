@@ -20,7 +20,6 @@ function getImageSrc(imageUrl?: string | null): string {
 
 export default function ProductCard({ product }: ProductCardProps) {
 
-
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden hover:border-orange-500 transition-colors group">
 
