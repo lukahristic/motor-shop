@@ -5,18 +5,31 @@ import { prisma } from "@/lib/prisma"
 import Link       from "next/link"
 
 async function getStats() {
-  // Run all queries in parallel for speed
-  const [totalProducts, totalUsers, inStockProducts, totalYears] =
-    await Promise.all([
-      prisma.product.count(),
-      prisma.user.count(),
-      prisma.product.count({ where: { inStock: true } }),
-      prisma.year.count(),
-    ])
+  const [
+    totalProducts,
+    totalUsers,
+    inStockProducts,
+    totalYears,
+    totalOrders,      
+    paidOrders,
+  ] = await Promise.all([
+    prisma.product.count(),
+    prisma.user.count(),
+    prisma.product.count({ where: { inStock: true } }),
+    prisma.year.count(),
+    prisma.order.count(),
+    prisma.order.count({ where: { status: "PAID" } }),
+  ])
 
-  return { totalProducts, totalUsers, inStockProducts, totalYears }
+  return {
+    totalProducts,
+    totalUsers,
+    inStockProducts,
+    totalYears,
+    totalOrders,
+    paidOrders,
+  }
 }
-
 export default async function AdminDashboard() {
   const stats = await getStats()
 
@@ -33,6 +46,8 @@ export default async function AdminDashboard() {
         <StatCard label="In Stock"       value={stats.inStockProducts} />
         <StatCard label="Total Users"    value={stats.totalUsers} />
         <StatCard label="Vehicle Years"  value={stats.totalYears} />
+        <StatCard label="Total Orders"  value={stats.totalOrders} />
+        <StatCard label="Paid Orders"   value={stats.paidOrders} />
       </div>
 
       {/* Quick Actions */}

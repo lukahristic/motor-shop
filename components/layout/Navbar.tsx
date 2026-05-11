@@ -56,6 +56,15 @@ export default function Navbar() {
               <span className="text-gray-400 text-sm">
                 {user.name}
               </span>
+              {user && (
+                <Link
+                  href="/orders"
+                  className="text-gray-400 hover:text-white text-sm transition-colors"
+                >
+                  My Orders
+                </Link>
+              )}
+
               <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
