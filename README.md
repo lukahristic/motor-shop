@@ -191,6 +191,24 @@ Year ──< Make ──< Model ──< ProductCompatibility >── Product
 | POST   | /api/admin/ymm/models           | Add a model                    |
 | DELETE | /api/admin/ymm/models/:id       | Delete a model                 |
 
+# Product Compatibility Management (admin)
+Admin side:
+GET    /api/admin/products/:id/compatibility        → list vehicles
+POST   /api/admin/products/:id/compatibility        → add vehicle
+DELETE /api/admin/products/:id/compatibility/:cid   → remove vehicle
+
+GET    /api/ymm/models-with-ids?year=X&make=Y       → models with DB IDs
+
+CompatibilityManager component:
+  ├── Fetches existing compatibility on load
+  ├── YMM chained dropdowns (same pattern as homepage)
+  ├── Add button → POST → optimistic state update
+  └── Remove button → DELETE → optimistic state update
+
+Public side:
+  Product detail page now shows compatible vehicles grid
+
+
 ---
 
 ## 🏃 Running Locally

@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     checkAuth()
-  }, [])
+  }, []) 
 
   // ── Login ───────────────────────────────────────────────
   async function login(email: string, password: string) {

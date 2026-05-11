@@ -1,86 +1,90 @@
 // app/products/[slug]/page.tsx
-// This page renders for ANY route matching /products/:slug
-
-import Image from "next/image"
-import Link from "next/link"
+import Image     from "next/image"
+import Link      from "next/link"
+import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
-import { getProductDetailBySlug } from "@/lib/products-data"
-import { FALLBACK_IMAGE } from "@/lib/constants"
 
-// Resolve product by slug at request time (no DB required during `next build`)
-export const dynamic = "force-dynamic"
-
-// Next.js passes route params to every page component automatically
-interface PageProps {
+export default async function ProductDetailPage({
+  params,
+}: {
   params: Promise<{ slug: string }>
-}
-
-export default async function ProductDetailPage({ params }: PageProps) {
+}) {
   const { slug } = await params
 
-  const product = await getProductDetailBySlug(slug)
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    include: {
+      // Fetch compatibility and navigate to year
+      compatibilities: {
+        include: {
+          model: {
+            include: {
+              make: {
+                include: { year: true },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
 
-  if (!product) {
-    notFound()
-  }
+  if (!product) notFound()
+
+  // Shape compatible vehicles for display
+  const compatibleVehicles = product.compatibilities.map((c) => ({
+    id:    c.id,
+    year:  c.model.make.year.year,
+    make:  c.model.make.name,
+    model: c.model.name,
+  }))
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
 
-      {/* Back Link */}
       <Link
         href="/products"
-        className="text-orange-400 hover:text-orange-300 text-sm mb-8 inline-block transition-colors"
+        className="text-orange-400 hover:text-orange-300 text-sm mb-8 inline-block"
       >
         ← Back to Products
       </Link>
 
-      {/* Product Detail Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-6">
 
-        {/* Left — Image */}
+        {/* Image */}
         <div className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-800">
           <Image
-            src={product.imageUrl?.trim() ? product.imageUrl : FALLBACK_IMAGE}
+            src={
+              product.imageUrl && product.imageUrl.trim() !== ""
+                ? product.imageUrl
+                : "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"
+            }
             alt={product.name}
             fill
             className="object-cover"
           />
         </div>
 
-        {/* Right — Info */}
+        {/* Info */}
         <div className="flex flex-col">
-
-          {/* Category */}
           <span className="text-orange-400 text-sm font-medium uppercase tracking-wide">
             {product.category}
           </span>
 
-          {/* Name */}
           <h1 className="text-3xl font-bold text-white mt-2 mb-4">
             {product.name}
           </h1>
 
-          {/* Description */}
           {product.description && (
             <p className="text-gray-400 text-base leading-relaxed mb-6">
               {product.description}
             </p>
           )}
 
-          {/* Compatible Vehicle — only shows if data exists */}
-          {product.compatibleMake && (
-            <p className="text-gray-500 text-sm mt-4">
-                Compatible with: {product.compatibleYear} {product.compatibleMake} {product.compatibleModel}
-            </p>
-            )}
-
-          {/* Price */}
           <div className="text-4xl font-bold text-white mb-4">
-            ${parseFloat(String(product.price)).toFixed(2)}
+            ${Number(product.price).toFixed(2)}
           </div>
 
-          {/* Stock Status */}
           <div className="mb-6">
             <span className={`inline-block text-sm font-medium px-3 py-1 rounded-full ${
               product.inStock
@@ -91,21 +95,42 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </span>
           </div>
 
-          {/* Add to Cart Button — not functional yet, wired up later */}
-          <Link href="/cart"> 
-            <button
-              disabled={!product.inStock}
-              className={`py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-                product.inStock
-                  ? "bg-orange-500 hover:bg-orange-600 cursor-pointer"
-                  : "bg-gray-700 cursor-not-allowed opacity-50"
-              }`}
-            >
-              {product.inStock ? "Add to Cart" : "Unavailable"}
-            </button>
-          </Link>
+          <button
+            disabled={!product.inStock}
+            className={`py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+              product.inStock
+                ? "bg-orange-500 hover:bg-orange-600"
+                : "bg-gray-700 opacity-50 cursor-not-allowed"
+            }`}
+          >
+            {product.inStock ? "Add to Cart" : "Unavailable"}
+          </button>
         </div>
       </div>
+
+      {/* Compatible Vehicles Section */}
+      {compatibleVehicles.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-white font-bold text-xl mb-4">
+            Compatible Vehicles
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {compatibleVehicles.map((vehicle) => (
+              <div
+                key={vehicle.id}
+                className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-lg px-4 py-3"
+              >
+                <span className="bg-gray-800 text-orange-400 text-xs font-medium px-2 py-1 rounded-full shrink-0">
+                  {vehicle.year}
+                </span>
+                <span className="text-gray-300 text-sm">
+                  {vehicle.make} {vehicle.model}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
     </div>
   )

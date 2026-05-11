@@ -62,3 +62,11 @@ export interface SerializedYear {
   year:  number
   makes: SerializedMake[]
 }
+
+export interface VehicleCompatibility {
+  compatibilityId: number
+  modelId:         number
+  model:           string
+  make:            string
+  year:            number
+}
