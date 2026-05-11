@@ -27,6 +27,7 @@ model Product {
 
   // A product can be compatible with many vehicles
   compatibilities ProductCompatibility[]
+  orderItems OrderItem[]  
 }
 
 // ── Vehicle Year ──────────────────────────────────────────
@@ -87,6 +88,40 @@ model User {
   password  String   // will store hashed password — NEVER plain text
   role      Role     @default(USER)
   createdAt DateTime @default(now())
+  orders Order[]
+}
+
+// prisma/schema.prisma — add below User model
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  user            User        @relation(fields: [userId], references: [id])
+  status          OrderStatus @default(PENDING)
+  total           Decimal     @db.Decimal(10, 2)
+  stripePaymentId String?     // Stripe payment intent ID
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2) // price at time of purchase
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 // ── Role Enum ─────────────────────────────────────────────
