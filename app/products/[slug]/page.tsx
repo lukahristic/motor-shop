@@ -3,6 +3,8 @@ import Image     from "next/image"
 import Link      from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import AddToCartButton from "@/components/ui/AddToCartButton"
+
 
 export default async function ProductDetailPage({
   params,
@@ -95,16 +97,16 @@ export default async function ProductDetailPage({
             </span>
           </div>
 
-          <button
-            disabled={!product.inStock}
-            className={`py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-              product.inStock
-                ? "bg-orange-500 hover:bg-orange-600"
-                : "bg-gray-700 opacity-50 cursor-not-allowed"
-            }`}
-          >
-            {product.inStock ? "Add to Cart" : "Unavailable"}
-          </button>
+          <AddToCartButton
+            inStock={product.inStock}
+            product={{
+              productId: product.id,
+              name:      product.name,
+              price:     Number(product.price),
+              imageUrl:  product.imageUrl,
+              slug:      product.slug,
+            }}
+          />
         </div>
       </div>
 

@@ -4,6 +4,7 @@
 import Link          from "next/link"
 import { useAuth }   from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
+import CartIcon from "@/components/ui/CartIcon"
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth()
@@ -41,6 +42,9 @@ export default function Navbar() {
               Admin
             </Link>
           )}
+          
+          <CartIcon />
+
 
           {/* Auth buttons — change based on login state */}
           {loading ? (

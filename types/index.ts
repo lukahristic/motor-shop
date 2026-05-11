@@ -70,3 +70,20 @@ export interface VehicleCompatibility {
   make:            string
   year:            number
 }
+
+// types/index.ts
+
+export interface CartItem {
+  productId:   number
+  name:        string
+  price:       number
+  imageUrl:    string | null
+  slug:        string
+  quantity:    number
+}
+
+export interface Cart {
+  items:     CartItem[]
+  total:     number
+  itemCount: number
+}
