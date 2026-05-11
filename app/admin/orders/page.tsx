@@ -1,7 +1,6 @@
 // app/admin/orders/page.tsx
-import { prisma }    from "@/lib/prisma"
-import Link          from "next/link"
-import UpdateOrderStatus from "@/components/admin/UpdateOrderStatus"
+import { prisma }          from "@/lib/prisma"
+import UpdateOrderStatus   from "@/components/admin/UpdateOrderStatus"
 
 export const dynamic = "force-dynamic"
 
@@ -31,33 +30,26 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
+
+      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-white mb-1">Orders</h1>
         <p className="text-gray-500 text-sm">{orders.length} total orders</p>
       </div>
 
-      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      {/* ── DESKTOP TABLE (hidden on mobile) ─────────────── */}
+      <div className="hidden md:block bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-800">
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Order
-              </th>
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Customer
-              </th>
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Items
-              </th>
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Total
-              </th>
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Status
-              </th>
-              <th className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3">
-                Update
-              </th>
+              {["Order", "Customer", "Items", "Total", "Status", "Update"].map((h) => (
+                <th
+                  key={h}
+                  className="text-left text-gray-500 text-xs font-medium uppercase tracking-wide px-4 py-3"
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -66,11 +58,8 @@ export default async function AdminOrdersPage() {
                 key={order.id}
                 className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50 transition-colors"
               >
-                {/* Order ID + Date */}
                 <td className="px-4 py-3">
-                  <p className="text-white text-sm font-medium">
-                    #{order.id}
-                  </p>
+                  <p className="text-white text-sm font-medium">#{order.id}</p>
                   <p className="text-gray-500 text-xs mt-0.5">
                     {new Date(order.createdAt).toLocaleDateString("en-PH", {
                       month: "short",
@@ -79,14 +68,10 @@ export default async function AdminOrdersPage() {
                     })}
                   </p>
                 </td>
-
-                {/* Customer */}
                 <td className="px-4 py-3">
                   <p className="text-white text-sm">{order.user.name}</p>
                   <p className="text-gray-500 text-xs">{order.user.email}</p>
                 </td>
-
-                {/* Items */}
                 <td className="px-4 py-3">
                   <p className="text-gray-400 text-xs max-w-[180px] truncate">
                     {order.items
@@ -94,22 +79,16 @@ export default async function AdminOrdersPage() {
                       .join(", ")}
                   </p>
                 </td>
-
-                {/* Total */}
                 <td className="px-4 py-3">
                   <span className="text-white text-sm font-semibold">
                     ${Number(order.total).toFixed(2)}
                   </span>
                 </td>
-
-                {/* Status badge */}
                 <td className="px-4 py-3">
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${getStatusStyle(order.status)}`}>
                     {order.status}
                   </span>
                 </td>
-
-                {/* Status updater */}
                 <td className="px-4 py-3">
                   <UpdateOrderStatus
                     orderId={order.id}
@@ -118,7 +97,6 @@ export default async function AdminOrdersPage() {
                 </td>
               </tr>
             ))}
-
             {orders.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-gray-500 text-sm">
@@ -129,6 +107,72 @@ export default async function AdminOrdersPage() {
           </tbody>
         </table>
       </div>
+
+      {/* ── MOBILE CARDS (hidden on desktop) ─────────────── */}
+      <div className="md:hidden space-y-3">
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            className="bg-gray-900 border border-gray-800 rounded-xl p-4"
+          >
+            {/* Top row — order ID + status */}
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-white font-semibold">#{order.id}</p>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  {new Date(order.createdAt).toLocaleDateString("en-PH", {
+                    month: "short",
+                    day:   "numeric",
+                    year:  "numeric",
+                  })}
+                </p>
+              </div>
+              <span className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${getStatusStyle(order.status)}`}>
+                {order.status}
+              </span>
+            </div>
+
+            {/* Customer */}
+            <div className="mb-2">
+              <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                Customer
+              </p>
+              <p className="text-white text-sm">{order.user.name}</p>
+              <p className="text-gray-500 text-xs">{order.user.email}</p>
+            </div>
+
+            {/* Items */}
+            <div className="mb-2">
+              <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">
+                Items
+              </p>
+              <p className="text-gray-300 text-xs line-clamp-2">
+                {order.items
+                  .map((i) => `${i.product.name} ×${i.quantity}`)
+                  .join(", ")}
+              </p>
+            </div>
+
+            {/* Total + Update row */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-800 mt-3">
+              <span className="text-white font-bold">
+                ${Number(order.total).toFixed(2)}
+              </span>
+              <UpdateOrderStatus
+                orderId={order.id}
+                currentStatus={order.status}
+              />
+            </div>
+          </div>
+        ))}
+
+        {orders.length === 0 && (
+          <div className="text-center py-12 text-gray-500 text-sm">
+            No orders yet
+          </div>
+        )}
+      </div>
+
     </div>
   )
 }

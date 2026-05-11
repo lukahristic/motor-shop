@@ -87,53 +87,49 @@ export default async function OrdersPage() {
         <div className="space-y-4">
           {orders.map((order) => (
             <Link
-              key={order.id}
-              href={`/orders/${order.id}`}
-              className="block bg-gray-900 border border-gray-800 hover:border-orange-500 rounded-xl p-5 transition-colors group"
+            key={order.id}
+            href={`/orders/${order.id}`}
+            className="block bg-gray-900 border border-gray-800 hover:border-orange-500 rounded-xl p-4 sm:p-5 transition-colors group"
             >
-              <div className="flex items-start justify-between gap-4 mb-4">
+            {/* Stack on mobile, row on sm+ */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-3">
 
-                {/* Order ID + Date */}
                 <div>
-                  <p className="text-white font-semibold group-hover:text-orange-400 transition-colors">
+                <p className="text-white font-semibold group-hover:text-orange-400 transition-colors">
                     Order #{order.id}
-                  </p>
-                  <p className="text-gray-500 text-xs mt-0.5">
+                </p>
+                <p className="text-gray-500 text-xs mt-0.5">
                     {new Date(order.createdAt).toLocaleDateString("en-PH", {
-                      year:  "numeric",
-                      month: "long",
-                      day:   "numeric",
+                    year:  "numeric",
+                    month: "long",
+                    day:   "numeric",
                     })}
-                  </p>
+                </p>
                 </div>
 
-                {/* Status + Total */}
-                <div className="text-right shrink-0">
-                  <span className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full mb-1 ${getStatusStyle(order.status)}`}>
+                {/* Status + total — stack on mobile */}
+                <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1">
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusStyle(order.status)}`}>
                     {order.status}
-                  </span>
-                  <p className="text-white font-bold">
+                </span>
+                <p className="text-white font-bold">
                     ${Number(order.total).toFixed(2)}
-                  </p>
+                </p>
                 </div>
-              </div>
+            </div>
 
-              {/* Product previews */}
-              <div className="flex items-center gap-2">
-                <p className="text-gray-500 text-sm">
-                  {order.items.length}{" "}
-                  {order.items.length === 1 ? "item" : "items"}:
-                </p>
-                <p className="text-gray-400 text-sm truncate">
-                  {order.items
-                    .map((i) => `${i.product.name} ×${i.quantity}`)
-                    .join(", ")}
-                </p>
-              </div>
+            {/* Items preview */}
+            <p className="text-gray-500 text-sm truncate">
+                {order.items.length}{" "}
+                {order.items.length === 1 ? "item" : "items"}:{" "}
+                <span className="text-gray-400">
+                {order.items.map((i) => `${i.product.name} ×${i.quantity}`).join(", ")}
+                </span>
+            </p>
 
-              <p className="text-orange-400 text-xs mt-3 group-hover:text-orange-300 transition-colors">
+            <p className="text-orange-400 text-xs mt-3 group-hover:text-orange-300 transition-colors">
                 View details →
-              </p>
+            </p>
             </Link>
           ))}
         </div>
