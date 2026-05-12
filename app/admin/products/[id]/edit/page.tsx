@@ -27,6 +27,8 @@ export default async function EditProductPage({ params }: PageProps) {
     inStock:     product.inStock,
     imageUrl:    product.imageUrl,
     category:    product.category,
+    subcategory: product.subcategory ?? "",
+    brand:       product.brand ?? "",
     createdAt:   product.createdAt.toISOString(),
     updatedAt:   product.updatedAt.toISOString(),
   }
