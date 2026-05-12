@@ -22,12 +22,33 @@ function toProduct(p: PrismaProduct): Product {
 }
 
 /** Same dataset as GET /api/products */
-export async function getAllProductsForCatalog(): Promise<Product[]> {
+/** Same dataset as GET /api/products */
+export async function getAllProductsForCatalog(filters?: {
+  category?: string
+  subcategory?: string
+  brand?: string
+}): Promise<Product[]> {
   const rows = await prisma.product.findMany({
+    where: {
+      ...(filters?.category
+        ? { category: filters.category }
+        : {}),
+
+      ...(filters?.subcategory
+        ? { subcategory: filters.subcategory }
+        : {}),
+
+      ...(filters?.brand
+        ? { brand: filters.brand }
+        : {}),
+    },
+
     orderBy: { createdAt: "desc" },
   })
+
   return rows.map(toProduct)
 }
+
 
 /** Same dataset as GET /api/products/by-vehicle */
 export async function getProductsByVehicle(params: {

@@ -40,6 +40,8 @@ export interface SerializedProduct {
   inStock:     boolean
   imageUrl:    string | null
   category:    string
+  subcategory: string
+  brand:       string
   createdAt:   string           // ← plain string, not Date object
   updatedAt:   string
 }

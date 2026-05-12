@@ -24,6 +24,8 @@ export default function EditProductForm({ product }: Props) {
     description: product.description ?? "",
     price:       String(product.price),
     category:    product.category,
+    subcategory: product.subcategory, 
+    brand:       product.brand, 
     imageUrl:    product.imageUrl ?? "",
     inStock:     product.inStock,
   })
@@ -128,6 +130,7 @@ export default function EditProductForm({ product }: Props) {
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
             />
           </div>
+          {/* Category */}
           <div>
             <label className="block text-gray-400 text-sm mb-1.5">
               Category *
@@ -139,11 +142,57 @@ export default function EditProductForm({ product }: Props) {
               required
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
             >
-              <option value="Engine">Engine</option>
+              <option value="">Select category</option>
+              <option value="Big Bike">Big Bike</option>
+              <option value="Scooter">Scooter</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+
+          {/* Subcategory */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Part Type
+            </label>
+            <select
+              name="subcategory"
+              value={form.subcategory}
+              onChange={handleChange}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+            >
+              <option value="">Select part type</option>
+              <option value="Engine">Engine parts</option>
               <option value="Brakes">Brakes</option>
               <option value="Suspension">Suspension</option>
+              <option value="Exhaust">Exhaust</option>
               <option value="Electrical">Electrical</option>
-              <option value="Body">Body</option>
+              <option value="Body">Body & fairings</option>
+              <option value="Drivetrain">Drivetrain</option>
+              <option value="Oils">Oils & fluids</option>
+            </select>
+          </div>
+
+          {/* Brand */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Brand
+            </label>
+            <select
+              name="brand"
+              value={form.brand}
+              onChange={handleChange}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+            >
+              <option value="">Select brand</option>
+              <option value="Kawasaki">Kawasaki</option>
+              <option value="BMW">BMW</option>
+              <option value="Honda">Honda</option>
+              <option value="Suzuki">Suzuki</option>
+              <option value="Yamaha">Yamaha</option>
+              <option value="Ducati">Ducati</option>
+              <option value="KTM">KTM</option>
+              <option value="Triumph">Triumph</option>
+              <option value="Universal">Universal (fits all)</option>
             </select>
           </div>
         </div>

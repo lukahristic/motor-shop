@@ -35,6 +35,10 @@ export default function Navbar() {
           >
             Products
           </Link>
+
+          <Link href="/big-bikes" className="text-gray-400 hover:text-white text-sm transition-colors">
+            Big Bikes
+          </Link>
           {user?.role === "ADMIN" && (
             <Link
               href="/admin"
@@ -100,6 +104,9 @@ export default function Navbar() {
           className="text-gray-400 hover:text-white text-sm transition-colors"
         >
           Products
+        </Link>
+        <Link href="/big-bikes" className="text-gray-400 hover:text-white text-sm transition-colors">
+          Big Bikes
         </Link>
         {user?.role === "ADMIN" && (
           <Link

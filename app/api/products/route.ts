@@ -5,11 +5,22 @@ import { getUserFromHeaders } from "@/lib/get-user"
 import { getAllProductsForCatalog } from "@/lib/products-data"
 
 // GET /api/products — fetch all products from the real database
-export async function GET() {
-  const products = await getAllProductsForCatalog()
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+
+  const category = searchParams.get("category") ?? undefined
+  const subcategory = searchParams.get("subcategory") ?? undefined
+  const brand = searchParams.get("brand") ?? undefined
+
+  const products = await getAllProductsForCatalog({
+    category,
+    subcategory,
+    brand,
+  })
 
   return successResponse(products, `${products.length} products found`)
 }
+
 
 // POST /api/products — create a product in the real database
 export async function POST(request: Request) {
