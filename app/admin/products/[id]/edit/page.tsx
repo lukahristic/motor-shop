@@ -24,11 +24,14 @@ export default async function EditProductPage({ params }: PageProps) {
     slug:        product.slug,
     description: product.description,
     price:       Number(product.price),
+    salePrice:   product.salePrice ? Number(product.salePrice) : null,  // ← new
+    stockCount:  product.stockCount ?? null,                             // ← new
+    isNew:       product.isNew,                                          // ← new
     inStock:     product.inStock,
     imageUrl:    product.imageUrl,
     category:    product.category,
-    subcategory: product.subcategory ?? "",
-    brand:       product.brand ?? "",
+    subcategory: product.subcategory ?? null,
+    brand:       product.brand ?? null,
     createdAt:   product.createdAt.toISOString(),
     updatedAt:   product.updatedAt.toISOString(),
   }

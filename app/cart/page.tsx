@@ -6,12 +6,8 @@ import { useAuth }  from "@/lib/auth-context"
 import Link         from "next/link"
 import Image        from "next/image"
 import { useRouter } from "next/navigation"
-import { FALLBACK_IMAGE } from "@/lib/constants"
-
-function getImageSrc(imageUrl?: string | null): string {
-  if (!imageUrl || imageUrl.trim() === "") return FALLBACK_IMAGE
-  return imageUrl
-}
+import { imageSrc } from "@/lib/image-src"
+import { formatPHP } from "@/lib/price"
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart()
@@ -60,7 +56,7 @@ export default function CartPage() {
               {/* Smaller image on mobile */}
               <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0">
                 <Image
-                  src={item.imageUrl ?? FALLBACK_IMAGE}
+                  src={imageSrc(item.imageUrl)}
                   alt={item.name}
                   fill
                   className="object-cover"
@@ -76,7 +72,7 @@ export default function CartPage() {
                   {item.name}
                 </Link>
                 <p className="text-orange-400 font-semibold mt-1 text-sm">
-                  ${item.price.toFixed(2)}
+                  {formatPHP(item.price)}
                 </p>
 
                 {/* Quantity + remove row */}
@@ -103,7 +99,7 @@ export default function CartPage() {
 
               {/* Line total — hidden on very small, shown sm+ */}
               <div className="hidden sm:block text-white font-bold text-right shrink-0">
-                ${(item.price * item.quantity).toFixed(2)}
+                {formatPHP(item.price * item.quantity)}
               </div>
             </div>
           ))}
@@ -111,8 +107,30 @@ export default function CartPage() {
 
         {/* Order summary — full width on mobile, sticky on desktop */}
         <div className="lg:col-span-1">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 lg:sticky lg:top-6">
-            {/* ... rest of summary unchanged */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 lg:sticky lg:top-6 space-y-4">
+            <h2 className="text-white font-semibold text-lg">Order summary</h2>
+            <div className="flex justify-between text-sm text-gray-400">
+              <span>Subtotal ({cart.itemCount} items)</span>
+              <span className="text-white font-medium">
+                {formatPHP(cart.total)}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500">
+              Shipping and taxes are calculated at checkout.
+            </p>
+            <button
+              type="button"
+              onClick={handleCheckout}
+              className="w-full py-3 px-4 rounded-lg font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors"
+            >
+              Checkout
+            </button>
+            <Link
+              href="/products"
+              className="block text-center text-sm text-gray-400 hover:text-orange-400 transition-colors"
+            >
+              Continue shopping
+            </Link>
           </div>
         </div>
       </div>  

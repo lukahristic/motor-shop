@@ -6,7 +6,7 @@ import Link          from "next/link"
 import Image         from "next/image"
 import { prisma }    from "@/lib/prisma"
 import AddToCartButton from "@/components/ui/AddToCartButton"
-import { FALLBACK_IMAGE } from "@/lib/constants"
+import { imageSrc } from "@/lib/image-src"
 
 export const dynamic = "force-dynamic"
 
@@ -266,7 +266,7 @@ export default async function BigBikesPage({ searchParams }: PageProps) {
                 {/* Image */}
                 <div className="relative h-44 bg-gray-800">
                   <Image
-                    src={product.imageUrl ?? FALLBACK_IMAGE}
+                    src={imageSrc(product.imageUrl)}
                     alt={product.name}
                     fill
                     className="object-cover"

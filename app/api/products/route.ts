@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     const user = getUserFromHeaders(request)
 
     if (!user) return ApiErrors.unauthorized()
+    if (user.role !== "ADMIN") return ApiErrors.forbidden()
       
     const body = await request.json()
 
@@ -38,15 +39,21 @@ export async function POST(request: Request) {
       )
     }
 
+    // app/api/products/route.ts — update POST
     const product = await prisma.product.create({
       data: {
-        name: body.name,
-        slug: body.name.toLowerCase().replace(/\s+/g, "-"),
+        name:        body.name,
+        slug:        body.name.toLowerCase().replace(/\s+/g, "-"),
         description: body.description ?? "",
-        price: Number(body.price),
-        inStock: body.inStock ?? true,
-        category: body.category,
-        imageUrl: body.imageUrl ?? "",
+        price:       Number(body.price),
+        salePrice:   body.salePrice ? Number(body.salePrice) : null,
+        stockCount:  body.stockCount ? Number(body.stockCount) : null,
+        isNew:       body.isNew ?? false,
+        inStock:     body.inStock ?? true,
+        category:    body.category,
+        subcategory: body.subcategory ?? null,
+        brand:       body.brand ?? null,
+        imageUrl:    body.imageUrl ?? "",
       },
     })
 

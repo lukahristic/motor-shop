@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.lazcdn.com",
       },
+      {
+        protocol: "https",
+        hostname: "www.lazada.com.ph",
+      }
+
     ],
   },
 }

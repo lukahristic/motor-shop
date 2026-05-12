@@ -7,7 +7,7 @@ import { verifyToken } from "@/lib/auth"
 import { redirect, notFound } from "next/navigation"
 import Image           from "next/image"
 import Link            from "next/link"
-import { FALLBACK_IMAGE } from "@/lib/constants"
+import { imageSrc } from "@/lib/image-src"
 
 export const dynamic = "force-dynamic"
 
@@ -36,11 +36,6 @@ function getStatusDescription(status: string) {
 interface PageProps {
   params: Promise<{ id: string }>
 }
-
-function getImageSrc(imageUrl?: string | null): string {
-    if (!imageUrl || imageUrl.trim() === "") return FALLBACK_IMAGE
-    return imageUrl
-  }
 
 export default async function OrderDetailPage({ params }: PageProps) {
   const { id } = await params
@@ -139,7 +134,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
               {/* Product image */}
               <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-gray-800">
                 <Image
-                  src={getImageSrc(item.product.imageUrl)}
+                  src={imageSrc(item.product.imageUrl)}
                   alt={item.product.name}
                   fill
                   className="object-cover"

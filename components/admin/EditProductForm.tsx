@@ -23,13 +23,16 @@ export default function EditProductForm({ product }: Props) {
     name:        product.name,
     description: product.description ?? "",
     price:       String(product.price),
+    salePrice:   product.salePrice ? String(product.salePrice) : "",  // ← new
+    stockCount:  product.stockCount ? String(product.stockCount) : "", // ← new
+    isNew:       product.isNew,                                        // ← new
     category:    product.category,
-    subcategory: product.subcategory, 
-    brand:       product.brand, 
+    subcategory: product.subcategory ?? "",
+    brand:       product.brand ?? "",
     imageUrl:    product.imageUrl ?? "",
     inStock:     product.inStock,
   })
-
+  
   const [error,   setError]   = useState("")
   const [loading, setLoading] = useState(false)
 
@@ -58,6 +61,9 @@ export default function EditProductForm({ product }: Props) {
         body:    JSON.stringify({
           ...form,
           price: parseFloat(form.price),
+          salePrice:  form.salePrice ? parseFloat(form.salePrice) : null,
+          stockCount: form.stockCount ? parseInt(form.stockCount) : null,
+          isNew:      form.isNew,
         }),
       })
 
@@ -129,6 +135,77 @@ export default function EditProductForm({ product }: Props) {
               required
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
             />
+          </div>
+          {/* Sale Price */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Sale Price
+              <span className="text-gray-600 text-xs ml-2">
+                (leave empty for no discount)
+              </span>
+            </label>
+            <input
+              name="salePrice"
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.salePrice}
+              onChange={handleChange}
+              placeholder="e.g. 520.00"
+              className="w-full bg-gray-800 border border-gray-700 text-white
+                        rounded-lg px-4 py-2.5 text-sm focus:outline-none
+                        focus:border-orange-500 transition-colors"
+            />
+            {/* Live discount preview */}
+            {form.price && form.salePrice &&
+            Number(form.salePrice) < Number(form.price) && (
+              <p className="text-green-400 text-xs mt-1.5">
+                ✓ {Math.round(
+                    ((Number(form.price) - Number(form.salePrice)) /
+                      Number(form.price)) * 100
+                  )}% discount —
+                saves ₱{(Number(form.price) - Number(form.salePrice)).toFixed(2)}
+              </p>
+            )}
+          </div>
+
+          {/* Stock Count */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Stock Count
+              <span className="text-gray-600 text-xs ml-2">
+                (leave empty for unlimited)
+              </span>
+            </label>
+            <input
+              name="stockCount"
+              type="number"
+              min="0"
+              value={form.stockCount}
+              onChange={handleChange}
+              placeholder="e.g. 25"
+              className="w-full bg-gray-800 border border-gray-700 text-white
+                        rounded-lg px-4 py-2.5 text-sm focus:outline-none
+                        focus:border-orange-500 transition-colors"
+            />
+          </div>
+
+          {/* Is New toggle */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              name="isNew"
+              id="isNew"
+              checked={form.isNew}
+              onChange={handleChange}
+              className="w-4 h-4 accent-orange-500"
+            />
+            <label htmlFor="isNew" className="text-gray-400 text-sm">
+              Mark as new arrival
+              <span className="text-gray-600 text-xs ml-2">
+                (shows "New arrival" badge on card)
+              </span>
+            </label>
           </div>
           {/* Category */}
           <div>

@@ -14,13 +14,13 @@ export function proxy(request: NextRequest) {
   const isAdminRoute  = pathname.startsWith("/admin") ||
                         pathname.startsWith("/api/admin")
 
-  const isProtectedApi = (
-    (pathname.startsWith("/api/products") &&
-      request.method !== "GET") // only protect mutations
-  )
+  const isProductMutation =
+    pathname.startsWith("/api/products") && request.method !== "GET"
+
+  const isProtectedApi = isAdminRoute || isProductMutation
 
   // ── Check if route needs protection ──────────────────
-  if (!isAdminRoute && !isProtectedApi) {
+  if (!isProtectedApi) {
     return NextResponse.next() // not protected — let through
   }
 
@@ -40,8 +40,9 @@ export function proxy(request: NextRequest) {
   try {
     const payload = verifyToken(token)
 
-    // ── Admin routes require ADMIN role ───────────────
-    if (isAdminRoute && payload.role !== "ADMIN") {
+    // ── Admin UI + product writes require ADMIN role ──
+    const requiresAdminRole = isAdminRoute || isProductMutation
+    if (requiresAdminRole && payload.role !== "ADMIN") {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
           { success: false, error: "Admin access required" },
@@ -74,8 +75,9 @@ export function proxy(request: NextRequest) {
 // ── Which routes does this middleware apply to? ───────────
 export const config = {
   matcher: [
-    "/admin/:path*",        // all admin pages
-    "/api/admin/:path*",    // all admin API routes
-    "/api/products/:path*", // product mutations (POST/PUT/DELETE)
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/api/products",
+    "/api/products/:path*",
   ],
 }

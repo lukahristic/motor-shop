@@ -24,13 +24,30 @@ export async function GET(request: Request, { params }: RouteParams) {
 
 // PUT /api/products/:id
 export async function PUT(request: Request, { params }: RouteParams) {
+  const user = getUserFromHeaders(request)
+  if (!user) return ApiErrors.unauthorized()
+  if (user.role !== "ADMIN") return ApiErrors.forbidden()
+
   try {
     const { id } = await params
     const body = await request.json()
 
     const product = await prisma.product.update({
       where: { id: Number(id) },
-      data: body,
+      data: {
+        name:        body.name,
+        slug:        body.name?.toLowerCase().replace(/\s+/g, "-"),
+        description: body.description ?? "",
+        price:       Number(body.price),
+        salePrice:   body.salePrice ? Number(body.salePrice) : null,
+        stockCount:  body.stockCount ? Number(body.stockCount) : null,
+        isNew:       body.isNew ?? false,
+        inStock:     body.inStock ?? true,
+        category:    body.category,
+        subcategory: body.subcategory ?? null,
+        brand:       body.brand ?? null,
+        imageUrl:    body.imageUrl ?? "",
+      },
     })
 
     return successResponse(product, "Product updated successfully")
@@ -38,7 +55,6 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return ApiErrors.notFound("Product")
   }
 }
-
 // DELETE /api/products/:id
 export async function DELETE(request: Request, { params }: RouteParams) {
   const user = getUserFromHeaders(request)

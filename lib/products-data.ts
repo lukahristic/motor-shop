@@ -12,10 +12,15 @@ function toProduct(p: PrismaProduct): Product {
     name: p.name,
     slug: p.slug,
     description: p.description,
-    price: p.price.toString(),
+    price: Number(p.price),
+    salePrice: p.salePrice !== null ? Number(p.salePrice) : null,
     inStock: p.inStock,
+    stockCount: p.stockCount,
+    isNew: p.isNew,
     imageUrl: p.imageUrl,
     category: p.category,
+    subcategory: p.subcategory,
+    brand: p.brand,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   }
@@ -81,10 +86,16 @@ export async function getProductsByVehicle(params: {
   }
 }
 
+type ProductDetailBySlug = Product & {
+  compatibleYear?: number
+  compatibleMake?: string
+  compatibleModel?: string
+}
+
 /** Single product by slug for /products/[slug]; adds first YMM from compatibilities when present */
 export async function getProductDetailBySlug(
   slug: string
-): Promise<Product | null> {
+): Promise<ProductDetailBySlug | null> {
   const row = await prisma.product.findUnique({
     where: { slug },
     include: {

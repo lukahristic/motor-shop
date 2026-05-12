@@ -4,6 +4,8 @@ import Link      from "next/link"
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/ui/AddToCartButton"
+import { getPriceInfo, formatPHP, getStockStatus } from "@/lib/price"
+import { imageSrc } from "@/lib/image-src"
 
 
 export default async function ProductDetailPage({
@@ -23,15 +25,26 @@ export default async function ProductDetailPage({
             include: {
               make: {
                 include: { year: true },
+
+                
               },
             },
           },
         },
       },
     },
-  })
+  }
+)
 
   if (!product) notFound()
+
+  const priceInfo = getPriceInfo(
+    Number(product.price),
+    product.salePrice ? Number(product.salePrice) : null
+  )
+  
+  const stock = getStockStatus(product.inStock, product.stockCount)
+
 
   // Shape compatible vehicles for display
   const compatibleVehicles = product.compatibilities.map((c) => ({
@@ -56,15 +69,14 @@ export default async function ProductDetailPage({
         {/* Image */}
         <div className="relative w-full h-80 rounded-xl overflow-hidden border border-gray-800">
           <Image
-            src={
-              product.imageUrl && product.imageUrl.trim() !== ""
-                ? product.imageUrl
-                : "https://placehold.co/400x300/1a1a1a/orange?text=No+Image"
-            }
+            src={imageSrc(product.imageUrl)}
             alt={product.name}
             fill
-            className="object-cover"
+            className={`object-cover ${!product.inStock ? "grayscale opacity-55" : ""}`}
           />
+          {!product.inStock && (
+            <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+          )}
         </div>
 
         {/* Info */}
@@ -83,26 +95,46 @@ export default async function ProductDetailPage({
             </p>
           )}
 
-          <div className="text-4xl font-bold text-white mb-4">
-            ${Number(product.price).toFixed(2)}
+          <div className="mb-6">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className={`text-4xl font-extrabold ${
+                priceInfo.isOnSale ? "text-orange-500" : "text-white"
+              }`}>
+                {formatPHP(priceInfo.displayPrice)}
+              </span>
+              {priceInfo.isOnSale && (
+                <>
+                  <span className="text-gray-600 text-xl line-through">
+                    {formatPHP(priceInfo.originalPrice)}
+                  </span>
+                  <span className="bg-red-600 text-white text-sm font-bold
+                                  px-3 py-1 rounded-lg">
+                    -{priceInfo.discountPercent}% OFF
+                  </span>
+                </>
+              )}
+            </div>
+            {priceInfo.isOnSale && (
+              <p className="text-green-400 text-sm font-semibold mt-1">
+                You save {formatPHP(priceInfo.discountAmount)}
+              </p>
+            )}
           </div>
 
           <div className="mb-6">
-            <span className={`inline-block text-sm font-medium px-3 py-1 rounded-full ${
-              product.inStock
-                ? "bg-green-900 text-green-400"
-                : "bg-red-900 text-red-400"
-            }`}>
-              {product.inStock ? "In Stock" : "Out of Stock"}
+            <span className={`inline-block text-sm font-semibold px-3 py-1.5
+                            rounded-full ${stock.className}`}>
+              {stock.label}
             </span>
           </div>
 
+
           <AddToCartButton
-            inStock={product.inStock}
+            inStock={stock.canAdd}
             product={{
               productId: product.id,
               name:      product.name,
-              price:     Number(product.price),
+              price:     priceInfo.displayPrice,
               imageUrl:  product.imageUrl,
               slug:      product.slug,
             }}

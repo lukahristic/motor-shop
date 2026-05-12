@@ -13,25 +13,28 @@ datasource db {
 }
 
 // ── Product ──────────────────────────────────────────────
+// prisma/schema.prisma — update the Product model
+
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique   // URL-friendly name, must be unique
-  description String?            // optional
-  price       Decimal  @db.Decimal(10, 2)
-  inStock     Boolean  @default(true)
-  imageUrl    String?
-  category    String
-  subcategory String?  // "Engine" | "Brakes" | "Suspension" | "Exhaust" etc
-  brand       String?  // "Kawasaki" | "BMW" | "Honda" etc
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  description  String?
+  price        Decimal  @db.Decimal(10, 2)
+  salePrice    Decimal? @db.Decimal(10, 2)  // ← null means no sale
+  inStock      Boolean  @default(true)
+  stockCount   Int?                          // ← null = unlimited
+  isNew        Boolean  @default(false)      // ← shows "New arrival" badge
+  imageUrl     String?
+  category     String
+  subcategory  String?
+  brand        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  // A product can be compatible with many vehicles
   compatibilities ProductCompatibility[]
-  orderItems OrderItem[]  
+  orderItems      OrderItem[]
 }
-
 // ── Vehicle Year ──────────────────────────────────────────
 model Year {
   id    Int    @id @default(autoincrement())

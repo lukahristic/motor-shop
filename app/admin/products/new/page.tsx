@@ -1,9 +1,10 @@
 // app/admin/products/new/page.tsx
 "use client"
 
-import { useState }  from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Link          from "next/link"
+import { getPriceInfo, formatPHP } from "@/lib/price"
 
 export default function NewProductPage() {
   const router = useRouter()
@@ -12,12 +13,24 @@ export default function NewProductPage() {
     name:        "",
     description: "",
     price:       "",
+    salePrice:   "",
+    stockCount:  "",
+    isNew:       false,
     category:    "",
     imageUrl:    "",
     inStock:     true,
   })
+
   const [error,   setError]   = useState("")
   const [loading, setLoading] = useState(false)
+
+  const pricePreview = useMemo(() => {
+    const price = parseFloat(form.price)
+    const sale  = form.salePrice.trim() === "" ? null : parseFloat(form.salePrice)
+    if (!Number.isFinite(price) || price <= 0) return null
+    if (sale === null || !Number.isFinite(sale)) return null
+    return getPriceInfo(price, sale)
+  }, [form.price, form.salePrice])
 
   // Update a single field in the form state
   function handleChange(
@@ -44,6 +57,9 @@ export default function NewProductPage() {
         body:    JSON.stringify({
           ...form,
           price: parseFloat(form.price),
+          salePrice:  form.salePrice ? parseFloat(form.salePrice) : null,
+          stockCount: form.stockCount ? parseInt(form.stockCount) : null,
+          isNew:      form.isNew,
         }),
       })
 
@@ -164,6 +180,70 @@ export default function NewProductPage() {
               placeholder="https://..."
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
             />
+          </div>
+
+          {/* Sale price + live discount preview */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Sale price (optional)
+            </label>
+            <input
+              name="salePrice"
+              type="number"
+              step="0.01"
+              min="0"
+              value={form.salePrice}
+              onChange={handleChange}
+              placeholder="Leave empty if not on sale"
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+            />
+            {pricePreview?.isOnSale && (
+              <p className="mt-2 text-xs text-green-400 font-semibold">
+                Live preview: −{pricePreview.discountPercent}% off — customer saves{" "}
+                {formatPHP(pricePreview.discountAmount)} (sale {formatPHP(pricePreview.displayPrice)} vs{" "}
+                {formatPHP(pricePreview.originalPrice)})
+              </p>
+            )}
+            {pricePreview && !pricePreview.isOnSale && form.salePrice.trim() !== "" && (
+              <p className="mt-2 text-xs text-amber-400">
+                Sale price must be lower than regular price to show as a discount.
+              </p>
+            )}
+          </div>
+
+          {/* Stock count */}
+          <div>
+            <label className="block text-gray-400 text-sm mb-1.5">
+              Stock count (optional)
+            </label>
+            <input
+              name="stockCount"
+              type="number"
+              min="0"
+              step="1"
+              value={form.stockCount}
+              onChange={handleChange}
+              placeholder="Empty = unlimited"
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              When set to a small number (e.g. 3), the storefront shows an &quot;Only N left&quot; badge.
+            </p>
+          </div>
+
+          {/* New arrival */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              name="isNew"
+              id="isNew"
+              checked={form.isNew}
+              onChange={handleChange}
+              className="w-4 h-4 accent-orange-500"
+            />
+            <label htmlFor="isNew" className="text-gray-400 text-sm">
+              Mark as new arrival
+            </label>
           </div>
 
           {/* In Stock toggle */}
