@@ -6,6 +6,7 @@ import Footer              from "@/components/layout/Footer"
 import { AuthProvider }    from "@/lib/auth-context"
 import { CartProvider }    from "@/lib/cart-context"
 import "./globals.css"
+import "@tabler/icons-webfont/dist/tabler-icons.min.css"
 
 const geist = Geist({ subsets: ["latin"] })
 

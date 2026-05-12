@@ -1,36 +1,47 @@
 // app/page.tsx
-import FeatureCard from "@/components/ui/FeatureCard"
-import YMMSelector from "@/components/ui/YMMSelector"
+// New premium homepage — assembled from section components.
+// Each section is independently maintainable.
+
+import HeroSection        from "@/components/home/HeroSection"
+import FindMyFitBar       from "@/components/home/FindMyFitBar"
+import TrustBar           from "@/components/home/TrustBar"
+import CategorySection    from "@/components/home/CategorySection"
+import FeaturedProducts   from "@/components/home/FeaturedProducts"
+import BrandsStrip        from "@/components/home/BrandsStrip"
+import WhySection         from "@/components/home/WhySection"
+import ReviewsSection     from "@/components/home/ReviewsSection"
+import NewsletterSection from "@/components/home/NewsletterSection"
 
 export default function HomePage() {
   return (
-    <div>
-      {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center py-12 sm:py-24 px-4 sm:px-6 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold text-orange-500 mb-4">
-          Motor Shop
-        </h1>
-        <p className="text-lg sm:text-xl text-gray-400 max-w-xl mb-8 sm:mb-10">
-          Find the right parts for your vehicle. Search by Year, Make, and Model.
-        </p>
-        <YMMSelector />
-      </section>
+    <div className="bg-gray-950">
 
-      {/* Feature Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-6 pb-24">
-        <FeatureCard
-          title="YMM Search"
-          description="Filter parts by Year, Make, and Model for a perfect fit."
-        />
-        <FeatureCard
-          title="Wide Selection"
-          description="Thousands of parts and accessories for all vehicle types."
-        />
-        <FeatureCard
-          title="Fast Shipping"
-          description="Order today and get your parts delivered to your door."
-        />
-      </section>
+      {/* 1. Hero — full width, strong headline, CTAs, stats */}
+      <HeroSection />
+
+      {/* 2. Find My Fit — compact YMM bar, not the main focus */}
+      <FindMyFitBar />
+
+      {/* 3. Trust bar — shipping, genuine, support */}
+      <TrustBar />
+
+      {/* 4. Category banners — Big Bikes, Scooters, Accessories */}
+      <CategorySection />
+
+      {/* 5. Featured products — hot deals from the database */}
+      <FeaturedProducts />
+
+      {/* 6. Brand logos strip */}
+      <BrandsStrip />
+
+      {/* 7. Why shop with us — 4 trust columns */}
+      <WhySection />
+
+      {/* 8. Customer reviews */}
+      <ReviewsSection />
+
+      {/* 9. Newsletter signup */}
+      <NewsletterSection />
     </div>
   )
 }
