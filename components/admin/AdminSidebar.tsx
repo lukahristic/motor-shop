@@ -6,12 +6,12 @@ import { usePathname }   from "next/navigation"
 import { useEffect }     from "react"
 
 const links = [
-  { href: "/admin",          label: "Dashboard" },
-  { href: "/admin/products", label: "Products"  },
-  { href: "/admin/orders",   label: "Orders"    },
-  { href: "/admin/ymm",      label: "YMM Data"  },
+  { href: "/admin",           label: "Dashboard"  },
+  { href: "/admin/products",  label: "Products"   },
+  { href: "/admin/orders",    label: "Orders"     },
+  { href: "/admin/discounts", label: "Discounts"  }, // ← add this
+  { href: "/admin/ymm",       label: "YMM Data"   },
 ]
-
 interface Props {
 
   isDrawer?:  boolean
