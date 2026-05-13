@@ -1,7 +1,7 @@
 // components/ui/CartIcon.tsx
 "use client"
 
-import Link       from "next/link"
+import Link        from "next/link"
 import { useCart } from "@/lib/cart-context"
 
 export default function CartIcon() {
@@ -10,28 +10,21 @@ export default function CartIcon() {
   return (
     <Link
       href="/cart"
-      className="relative flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors"
+      aria-label={`Cart — ${cart.itemCount} items`}
+      className="relative p-2 rounded-lg text-gray-400
+                 hover:text-white hover:bg-gray-800
+                 transition-colors"
     >
-      {/* Shopping bag icon */}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-        <line x1="3" y1="6" x2="21" y2="6"/>
-        <path d="M16 10a4 4 0 01-8 0"/>
-      </svg>
+      <i className="ti ti-shopping-bag text-xl" aria-hidden="true" />
 
-      {/* Item count badge */}
       {cart.itemCount > 0 && (
-        <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+        <span
+          className="absolute top-1 right-1 bg-orange-500 text-white
+                     text-[9px] font-bold rounded-full min-w-[16px]
+                     h-4 flex items-center justify-center px-1
+                     leading-none"
+          aria-hidden="true"
+        >
           {cart.itemCount > 9 ? "9+" : cart.itemCount}
         </span>
       )}
