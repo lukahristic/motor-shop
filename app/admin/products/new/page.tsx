@@ -5,6 +5,7 @@ import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Link          from "next/link"
 import { getPriceInfo, formatPHP } from "@/lib/price"
+import ImageUpload from "@/components/ui/ImageUpload"
 
 export default function NewProductPage() {
   const router = useRouter()
@@ -17,7 +18,9 @@ export default function NewProductPage() {
     stockCount:  "",
     isNew:       false,
     category:    "",
-    imageUrl:    "",
+    subcategory: "",
+    brand:       "",
+    imageUrl:    "",   
     inStock:     true,
   })
 
@@ -173,13 +176,23 @@ export default function NewProductPage() {
             <label className="block text-gray-400 text-sm mb-1.5">
               Image URL
             </label>
-            <input
-              name="imageUrl"
-              value={form.imageUrl}
-              onChange={handleChange}
-              placeholder="https://..."
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
-            />
+            {/* Image Upload — replaces the plain text URL input */}
+              <ImageUpload
+                currentImageUrl={form.imageUrl || null}
+                onUploadComplete={(url) => {
+                  setForm((prev) => ({ ...prev, imageUrl: url }))
+                }}
+                onClear={() => {
+                  setForm((prev) => ({ ...prev, imageUrl: "" }))
+                }}
+              />
+
+              {/* Show the URL as read-only confirmation after upload */}
+              {form.imageUrl && (
+                <p className="text-gray-600 text-xs mt-1 truncate">
+                  ✓ {form.imageUrl}
+                </p>
+              )}
           </div>
 
           {/* Sale price + live discount preview */}

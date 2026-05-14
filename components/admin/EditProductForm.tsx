@@ -7,6 +7,7 @@
 import { useState }  from "react"
 import { useRouter } from "next/navigation"
 import Link          from "next/link"
+import ImageUpload from "@/components/ui/ImageUpload"
 
 // We use Prisma's generated type here for full accuracy
 import { SerializedProduct } from "@/types"
@@ -279,13 +280,22 @@ export default function EditProductForm({ product }: Props) {
           <label className="block text-gray-400 text-sm mb-1.5">
             Image URL
           </label>
-          <input
-            name="imageUrl"
-            value={form.imageUrl}
-            onChange={handleChange}
-            placeholder="https://..."
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+            {/* Image Upload */}
+          <ImageUpload
+            currentImageUrl={form.imageUrl || null}
+            onUploadComplete={(url) => {
+              setForm((prev) => ({ ...prev, imageUrl: url }))
+            }}
+            onClear={() => {
+              setForm((prev) => ({ ...prev, imageUrl: "" }))
+            }}
           />
+
+          {form.imageUrl && (
+            <p className="text-gray-600 text-xs mt-1 truncate">
+              ✓ {form.imageUrl}
+            </p>
+          )}
         </div>
 
         {/* In Stock */}

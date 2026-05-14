@@ -2,6 +2,8 @@
 import { prisma } from "@/lib/prisma"
 import { successResponse, ApiErrors } from "@/lib/api-response"
 import { getUserFromHeaders } from "@/lib/get-user"
+import cloudinary     from "@/lib/cloudinary"
+
 
 
 
@@ -57,18 +59,38 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 // DELETE /api/products/:id
 export async function DELETE(request: Request, { params }: RouteParams) {
-  const user = getUserFromHeaders(request)
-  if (!user) return ApiErrors.unauthorized()
-
-  // Only admins can delete products
-  if (user.role !== "ADMIN") return ApiErrors.forbidden()
-
   try {
     const { id } = await params
-    const product = await prisma.product.delete({
+
+    // Get the product first so we can delete its image
+    const product = await prisma.product.findUnique({
+      where:  { id: Number(id) },
+      select: { id: true, imageUrl: true },
+    })
+
+    if (!product) return ApiErrors.notFound("Product")
+
+    // Delete the image from Cloudinary if it exists
+    if (product.imageUrl?.includes("cloudinary.com")) {
+      try {
+        // Extract the public_id from the Cloudinary URL
+        // URL format: https://res.cloudinary.com/{cloud}/image/upload/{version}/{public_id}.{ext}
+        const urlParts  = product.imageUrl.split("/")
+        const filename  = urlParts[urlParts.length - 1]
+        const publicId  = `motorshop/products/${filename.split(".")[0]}`
+        await cloudinary.uploader.destroy(publicId)
+      } catch {
+        // Image deletion failing shouldn't block product deletion
+        console.error("Failed to delete image from Cloudinary")
+      }
+    }
+
+    // Delete the product
+    const deleted = await prisma.product.delete({
       where: { id: Number(id) },
     })
-    return successResponse(product, "Product deleted successfully")
+
+    return successResponse(deleted, "Product deleted successfully")
   } catch (error) {
     return ApiErrors.notFound("Product")
   }
